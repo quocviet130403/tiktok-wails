@@ -1,0 +1,159 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Light Theme Colors */
+  --bg-primary: #f3f4f6; /* Light gray background */
+  --text-primary: #1f2937; /* Dark gray text */
+  --bg-secondary: #ffffff; /* White card/content background */
+  --text-secondary: #1f2937; /* Dark text on secondary background */
+  --header-bg: #e5e7eb; /* Header background */
+  --border-color: #d1d5db; /* General border color */
+  --tab-list-bg: #e5e7eb; /* Tab list background */
+  --tab-active-bg: #ffffff; /* Active tab background */
+  --tab-active-text: #1f2937; /* Active tab text */
+  --table-header-bg: #f3f4f6; /* Table header background */
+  --table-row-hover: #f9fafb; /* Table row hover background */
+  --button-ghost-text: #4b5563; /* Ghost button text */
+  --button-ghost-hover-bg: #d1d5db; /* Ghost button hover background */
+  --input-bg: #ffffff; /* Input background */
+  --input-border: #d1d5db; /* Input border */
+  --input-text: #1f2937; /* Input text */
+  --primary-blue: #3b82f6; /* Primary blue for accents */
+  --primary-blue-hover: #2563eb; /* Darker blue on hover */
+  --red-color: #ef4444; /* Red for delete/stop */
+  --green-color: #22c55e; /* Green for start */
+  --shadow-color-light: rgba(0, 0, 0, 0.1); /* Light shadow */
+  --shadow-color-dark: rgba(0, 0, 0, 0.2); /* Darker shadow for active elements */
+  --dialog-bg: #ffffff;
+  --dialog-border: #e5e7eb;
+  --dropdown-bg: #ffffff;
+  --dropdown-border: #e5e7eb;
+  --dropdown-item-hover-bg: #f3f4f6;
+  --select-bg: #ffffff;
+  --select-border: #d1d5db;
+  --select-text: #1f2937;
+  --select-content-bg: #ffffff;
+  --select-item-hover-bg: #f3f4f6;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  /* Dark Theme Colors */
+  --bg-primary: #1f2937; /* Dark gray background */
+  --text-primary: #f9fafb; /* Light text */
+  --bg-secondary: #111827; /* Darker card/content background */
+  --text-secondary: #f9fafb; /* Light text on secondary background */
+  --header-bg: #1f2937; /* Dark header background */
+  --border-color: #374151; /* Darker border color */
+  --tab-list-bg: #1f2937; /* Dark tab list background */
+  --tab-active-bg: #374151; /* Active tab background */
+  --tab-active-text: #f9fafb; /* Active tab text */
+  --table-header-bg: #374151; /* Dark table header background */
+  --table-row-hover: #374151; /* Dark table row hover background */
+  --button-ghost-text: #d1d5db; /* Light ghost button text */
+  --button-ghost-hover-bg: #4b5563; /* Darker ghost button hover background */
+  --input-bg: #374151; /* Dark input background */
+  --input-border: #4b5563; /* Dark input border */
+  --input-text: #f9fafb; /* Light input text */
+  --shadow-color-light: rgba(0, 0, 0, 0.3); /* Dark shadow */
+  --shadow-color-dark: rgba(0, 0, 0, 0.5); /* Darker shadow for active elements */
+  --dialog-bg: #1f2937;
+  --dialog-border: #374151;
+  --dropdown-bg: #1f2937;
+  --dropdown-border: #374151;
+  --dropdown-item-hover-bg: #374151;
+  --select-bg: #374151;
+  --select-border: #4b5563;
+  --select-text: #f9fafb;
+  --select-content-bg: #1f2937;
+  --select-item-hover-bg: #374151;
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: oklch(0.205 0 0);
+  --color-sidebar-foreground: oklch(0.985 0 0);
+  --color-sidebar-primary: oklch(0.488 0.243 264.376);
+  --color-sidebar-primary-foreground: oklch(0.985 0 0);
+  --color-sidebar-accent: oklch(0.269 0 0);
+  --color-sidebar-accent-foreground: oklch(0.985 0 0);
+  --color-sidebar-border: oklch(0.269 0 0);
+  --color-sidebar-ring: oklch(0.439 0 0);
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol";
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  height: 100vh;
+  overflow: hidden; /* Prevent body scroll */
+  font-size: 0.875rem; /* Base font size for the app */
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+    outline-color: var(--ring);
+  }
+}

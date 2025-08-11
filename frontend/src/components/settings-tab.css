@@ -1,0 +1,119 @@
+/* components/settings-tab.css */
+.settings-grid-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  padding: 0.5rem; /* Slightly reduced padding */
+}
+
+@media (min-width: 768px) {
+  .settings-grid-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .settings-grid-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.settings-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem; /* Slightly smaller radius */
+  background-color: var(--table-row-hover); /* Use table-row-hover for card background */
+  box-shadow: 0 1px 2px var(--shadow-color-light);
+}
+
+.settings-card-title {
+  font-size: 1rem; /* Slightly smaller title */
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem; /* Space below title */
+}
+
+.settings-form-group {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.settings-label {
+  /* Inherits from custom-label */
+}
+
+.settings-input {
+  /* Inherits from custom-input */
+}
+
+.settings-select-trigger-custom {
+  /* Inherits from custom-select-container */
+}
+
+.settings-input-with-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.settings-input-flex {
+  flex: 1;
+  /* Inherits from custom-input */
+}
+
+.settings-icon-button {
+  /* Inherits from custom-button.outline.icon-sm */
+  background-color: var(--input-bg); /* Ensure background is input-bg */
+}
+
+.settings-icon-color {
+  color: var(--button-ghost-text);
+}
+
+.settings-select-trigger-flex-custom {
+  flex: 1;
+  /* Inherits from custom-select-container */
+}
+
+.settings-select-trigger-sm-custom {
+  width: 100px;
+  min-width: 80px; /* Ensure minimum width */
+}
+
+.settings-separator {
+  margin-top: 0.75rem; /* Increased margin */
+  margin-bottom: 0.75rem;
+}
+
+.settings-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.settings-start-button {
+  flex: 1;
+  background-color: var(--green-color);
+  color: white;
+}
+
+.settings-start-button:hover {
+  background-color: #16a34a; /* Darker green */
+}
+
+.settings-stop-button {
+  flex: 1;
+  background-color: var(--red-color);
+  color: white;
+}
+
+.settings-stop-button:hover {
+  background-color: #dc2626; /* Darker red */
+}
+
+/* Icon spacing (re-used from globals.css) */
+.icon-mr {
+  margin-right: 0.5rem;
+}

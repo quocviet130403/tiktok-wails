@@ -1,0 +1,109 @@
+/* components/main-header.css */
+.main-header {
+  background-color: var(--header-bg);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.5rem 1rem; /* Increased padding for better spacing */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.header-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-menu-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Reduced gap for menu items */
+}
+
+.header-menu-button {
+  color: var(--button-ghost-text);
+  padding: 0.375rem 0.75rem; /* Smaller padding for menu buttons */
+  font-size: 0.875rem;
+}
+
+.header-utility-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; /* Smaller gap for utility icons */
+}
+
+.header-bottom-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.5rem; /* Add some padding to separate from top row */
+}
+
+.header-action-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-action-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem; /* Smaller gap between icon and text */
+  color: var(--button-ghost-text);
+  padding: 0.25rem 0.5rem; /* Smaller padding for action buttons */
+  font-size: 0.75rem; /* text-xs */
+}
+
+.button-text-xs {
+  font-size: 0.75rem;
+}
+
+.header-separator {
+  height: 2.5rem;
+  width: 1px;
+  background-color: var(--border-color);
+  margin: 0 0.5rem; /* Margin around separator */
+}
+
+.header-settings-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto; /* Push to the right */
+}
+
+.header-setting-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-setting-icon {
+  color: var(--button-ghost-text);
+}
+
+.header-setting-label {
+  font-size: 0.875rem;
+  color: var(--button-ghost-text);
+}
+
+.header-setting-input {
+  width: 6rem;
+  height: 2rem;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.header-setting-input-sm {
+  width: 4rem;
+  height: 2rem;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+/* Dropdown specific positioning for align-end */
+.custom-dropdown-content.align-end {
+  right: 0;
+  left: auto;
+}

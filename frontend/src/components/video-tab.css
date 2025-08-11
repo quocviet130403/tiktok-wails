@@ -1,0 +1,63 @@
+/* components/video-tab.css */
+.video-tab-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Table specific styles */
+.table-head-play {
+  width: 40px;
+  text-align: center;
+}
+.table-head-title {
+  min-width: 150px; /* Ensure minimum width */
+}
+.table-head-description {
+  min-width: 150px;
+}
+.table-head-duration {
+  width: 100px;
+}
+.table-head-thumbnail {
+  min-width: 150px;
+}
+.table-head-schedule {
+  width: 100px;
+}
+.table-head-account {
+  width: 100px;
+}
+.table-head-status {
+  width: 100px;
+}
+.table-head-download {
+  width: 80px;
+}
+.table-head-render {
+  width: 80px;
+}
+.table-head-upload {
+  width: 80px;
+}
+.table-head-edit {
+  width: 60px;
+  text-align: center;
+}
+.table-head-delete {
+  width: 60px;
+  text-align: center;
+}
+
+.table-cell-play {
+  text-align: center;
+}
+
+.table-cell-edit,
+.table-cell-delete {
+  text-align: center;
+}
+
+.table-action-button {
+  /* Inherits from custom-button.ghost.icon-sm */
+}
