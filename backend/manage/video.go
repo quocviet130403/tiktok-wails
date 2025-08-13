@@ -1,1 +1,177 @@
 package manage
+
+import (
+	"context"
+	"database/sql"
+	"encoding/base64"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"tiktok-wails/backend/global"
+	"time"
+
+	"github.com/chromedp/chromedp"
+)
+
+type VideoManager struct {
+	db *sql.DB
+}
+
+func NewVideoManager(db *sql.DB) *VideoManager {
+	return &VideoManager{db: db}
+}
+
+func (vm *VideoManager) LoginTiktok(temdir string) error {
+	opts := append(chromedp.DefaultExecAllocatorOptions[:],
+		chromedp.ExecPath(global.PathAppChrome),                         // chỉnh lại nếu cần
+		chromedp.Flag("headless", false),                                // hiển thị trình duyệt
+		chromedp.Flag("disable-blink-features", "AutomationControlled"), // ẩn thuộc tính "navigator.webdriver"
+		chromedp.Flag("disable-infobars", true),                         // tắt thanh thông tin "Chrome is being controlled by..."
+		chromedp.Flag("start-maximized", true),                          // mở trình duyệt với kích thước tối đa
+		chromedp.Flag("disable-dev-shm-usage", true),                    // tránh crash trong môi trường ít tài nguyên
+		chromedp.Flag("no-sandbox", true),                               // tránh sandbox errors (nên cân nhắc với bảo mật)
+		chromedp.Flag("disable-extensions", true),                       // tắt extension mặc định
+		chromedp.Flag("disable-gpu", true),                              // tắt GPU (tùy máy)
+		chromedp.UserDataDir(global.PathTempProfile+temdir),             // Thư mục tạm để lưu dữ liệu người dùng
+	)
+
+	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
+	defer cancel()
+
+	ctx, cancel := chromedp.NewContext(allocCtx,
+		chromedp.WithLogf(log.Printf),
+	)
+	defer cancel()
+
+	ctx, cancel = context.WithTimeout(ctx, 300*time.Second) // Tăng timeout một chút
+	defer cancel()
+
+	err := chromedp.Run(ctx,
+		chromedp.Navigate("https://www.tiktok.com/login"),
+		chromedp.WaitVisible(`.TUXButton-iconContainer`, chromedp.ByQuery),
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (vm *VideoManager) UploadVideo(profile, video, title string) {
+	opts := append(chromedp.DefaultExecAllocatorOptions[:],
+		chromedp.ExecPath(global.PathAppChrome),                         // chỉnh lại nếu cần
+		chromedp.Flag("headless", false),                                // hiển thị trình duyệt
+		chromedp.Flag("disable-blink-features", "AutomationControlled"), // ẩn thuộc tính "navigator.webdriver"
+		chromedp.Flag("disable-infobars", true),                         // tắt thanh thông tin "Chrome is being controlled by..."
+		chromedp.Flag("start-maximized", true),                          // mở trình duyệt với kích thước tối đa
+		chromedp.Flag("disable-dev-shm-usage", true),                    // tránh crash trong môi trường ít tài nguyên
+		chromedp.Flag("no-sandbox", true),                               // tránh sandbox errors (nên cân nhắc với bảo mật)
+		chromedp.Flag("disable-extensions", true),                       // tắt extension mặc định
+		chromedp.Flag("disable-gpu", true),                              // tắt GPU (tùy máy)
+		chromedp.Flag("lang", "vi-VN"),                                  // đặt ngôn ngữ tiếng Việt
+		chromedp.Flag("accept-language", "vi-VN,vi;q=0.9,en;q=0.8"),     // thứ tự ưu tiên ngôn ngữ
+		chromedp.UserDataDir(global.PathTempProfile+profile),
+	)
+
+	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
+	defer cancel()
+
+	ctx, cancel := chromedp.NewContext(allocCtx,
+		chromedp.WithLogf(log.Printf),
+	)
+	defer cancel()
+
+	ctx, cancel = context.WithTimeout(ctx, 90*time.Second) // Tăng timeout một chút
+	defer cancel()
+
+	// --- BƯỚC 1: Điều hướng đến trang chính ---
+	err := chromedp.Run(ctx,
+		chromedp.Navigate("https://www.tiktok.com/tiktokstudio/upload?from=webapp"),
+		chromedp.Sleep(5*time.Second),
+		// chromedp.ActionFunc(func(ctx context.Context) error {
+		// 	log.Println("=== start ===")
+		// 	return nil
+		// }),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			// Đọc file thành base64
+			fileData, err := ioutil.ReadFile(`videos/` + video) // Đường dẫn đến file video
+			if err != nil {
+				return err
+			}
+
+			base64Data := base64.StdEncoding.EncodeToString(fileData)
+
+			// Inject file data thông qua CDP
+			js := fmt.Sprintf(`
+				(function() {
+					const input = document.querySelector('input[type="file"]');
+					if (input) {
+						const blob = new Blob([Uint8Array.from(atob('%s'), c => c.charCodeAt(0))], {type: 'video/mp4'});
+						const file = new File([blob], 'video.mp4', {type: 'video/mp4'});
+						const dt = new DataTransfer();
+						dt.items.add(file);
+						input.files = dt.files;
+						input.dispatchEvent(new Event('change', {bubbles: true}));
+					}
+				})();
+			`, base64Data)
+
+			return chromedp.Evaluate(js, nil).Do(ctx)
+		}),
+
+		// chromedp.ActionFunc(func(ctx context.Context) error {
+		// 	log.Println("=== done ===")
+		// 	return nil
+		// }),
+
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			// log.Println("=== Điền caption ===")
+
+			// Tìm và click vào editor
+			return chromedp.Click(`.public-DraftEditor-content`, chromedp.ByQuery).Do(ctx)
+		}),
+
+		chromedp.Sleep(1*time.Second),
+
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			// Xóa nội dung cũ và điền nội dung mới
+			js := fmt.Sprintf(`
+				(function() {
+					const editor = document.querySelector('.public-DraftEditor-content');
+					if (editor) {
+						// Focus vào editor
+						editor.focus();
+						
+						// Xóa tất cả nội dung
+						document.execCommand('selectAll');
+						document.execCommand('delete');
+						
+						// Điền nội dung mới
+						document.execCommand('insertText', false, '%s');
+						
+						// Trigger events
+						editor.dispatchEvent(new Event('input', {bubbles: true}));
+						editor.dispatchEvent(new Event('change', {bubbles: true}));
+					}
+				})();
+			`, title)
+
+			return chromedp.Evaluate(js, nil).Do(ctx)
+		}),
+
+		// Thiếu click button submit để đăng video
+		chromedp.Sleep(360*time.Second), // Đợi trang tải xong
+	)
+
+	if err != nil {
+		log.Fatalf("Lỗi khi điều hướng đến trang chính: %v", err)
+	}
+
+}
+
+func (vm *VideoManager) AddVideo(title, videoURL, thumbnailURL string, duration int, likeCount int, accountID int) error {
+	insertSQL := `INSERT INTO videos (title, video_url, thumbnail_url, duration, like_count, account_id) VALUES (?, ?, ?, ?, ?, ?)`
+	_, err := vm.db.Exec(insertSQL, title, videoURL, thumbnailURL, duration, likeCount, accountID)
+	return err
+}

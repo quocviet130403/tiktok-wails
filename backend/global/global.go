@@ -5,5 +5,9 @@ import (
 )
 
 var (
-	DB *sql.DB
+	DB                *sql.DB
+	PathTempProfile   string
+	PathVideoReup     string
+	PathHandleCaptcha string
+	PathAppChrome     string
 )

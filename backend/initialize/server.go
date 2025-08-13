@@ -1,11 +1,21 @@
 package initialize
 
 import (
-	"database/sql"
 	"tiktok-wails/backend/global"
 )
 
-func InitServer(db *sql.DB) error {
-	global.DB = db
+func InitServer() error {
+
+	dbInit, err := InitDatabase()
+	if err != nil {
+		panic("Error initializing database: " + err.Error())
+	}
+	err = InitGlobal(dbInit)
+	if err != nil {
+		panic("Error initializing global: " + err.Error())
+	}
+
+	InitManage(global.DB)
+
 	return nil
 }

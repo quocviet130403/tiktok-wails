@@ -2,20 +2,16 @@ package backend
 
 import (
 	"context"
-	"database/sql"
 )
 
 // App struct
 type App struct {
-	db  *sql.DB
 	ctx context.Context
 }
 
 // NewApp creates a new App application struct
-func NewApp(db *sql.DB) *App {
-	return &App{
-		db: db,
-	}
+func NewApp() *App {
+	return &App{}
 }
 
 // Startup is called when the app starts. The context is saved

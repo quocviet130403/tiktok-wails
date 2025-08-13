@@ -16,19 +16,13 @@ var assets embed.FS
 func main() {
 	// Create an instance of the app structure
 
-	dbInit, err := initialize.InitDatabase()
-	if err != nil {
-		println("Error initializing database:", err.Error())
-		return
-	}
-
-	err = initialize.InitServer(dbInit)
+	err := initialize.InitServer()
 	if err != nil {
 		println("Error initializing server:", err.Error())
 		return
 	}
 
-	app := backend.NewApp(dbInit)
+	app := backend.NewApp()
 
 	// Create application with options
 	err = wails.Run(&options.App{
