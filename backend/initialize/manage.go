@@ -8,4 +8,5 @@ import (
 
 func InitManage(db *sql.DB) {
 	service.InitVideoManager(implement.NewVideoManager(db))
+	service.InitAccountManager(implement.NewAccountManager(db))
 }
