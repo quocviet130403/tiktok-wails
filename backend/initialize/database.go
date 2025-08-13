@@ -1,9 +1,13 @@
 package initialize
 
-import "database/sql"
+import (
+	"database/sql"
+
+	_ "modernc.org/sqlite"
+)
 
 func InitDatabase() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", "accounts.db")
+	db, err := sql.Open("sqlite", "accounts.db")
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +38,6 @@ func InitDatabase() (*sql.DB, error) {
 		video_url TEXT NOT NULL,
 		thumbnail_url TEXT,
 		account_id INTEGER,
-		FOREIGN KEY (account_id) REFERENCES accounts (id),
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		duration INTEGER,
 		like_count INTEGER DEFAULT 0
