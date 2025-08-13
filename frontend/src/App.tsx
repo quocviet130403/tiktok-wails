@@ -1,17 +1,33 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ThemeProvider } from "@/components/theme-provider"
 import { MainHeader } from "@/components/main-header"
 import { AccountTab } from "@/components/account-tab"
 import { VideoTab } from "@/components/video-tab"
 import { SettingsTab } from "@/components/settings-tab"
+import { GetAllAccounts } from "../wailsjs/go/backend/App"
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("account")
   const [isDarkMode, setIsDarkMode] = useState(false)
   const toggleTheme = () => setIsDarkMode((prev) => !prev)
+  const [accounts, setAccounts] = useState<any[]>([])
+
+  const fetchAccounts = async () => {
+    const result = await GetAllAccounts()
+    console.log("Fetched accounts:", result)
+    if (result) {
+      setAccounts(result)
+    }
+  }
+
+  useEffect(() => {
+    fetchAccounts()
+  }, [])
+
+  console.log(accounts)
 
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

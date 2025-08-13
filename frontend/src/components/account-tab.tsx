@@ -25,6 +25,7 @@ export function AccountTab() {
     { id: "6", type: "Page", name: "Cộng đồng Pokémon Go" },
   ])
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [currentAccount, setCurrentAccount] = useState<Account | null>(null)
   const [editName, setEditName] = useState("")
   const [editType, setEditType] = useState("")
@@ -116,6 +117,7 @@ export function AccountTab() {
         <Button
           variant="ghost"
           className="flex items-center gap-1 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+          onClick={() => setIsCreateDialogOpen(true)}
         >
           <Plus className="h-4 w-4" /> Add
         </Button>
@@ -199,6 +201,50 @@ export function AccountTab() {
         <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50">
           <DialogHeader>
             <DialogTitle className="text-gray-900 dark:text-gray-50">Chỉnh sửa Account</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right text-gray-700 dark:text-gray-300">
+                Tên
+              </Label>
+              <Input
+                id="name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="type" className="text-right text-gray-700 dark:text-gray-300">
+                Loại
+              </Label>
+              <Select value={editType} onValueChange={setEditType}>
+                <SelectTrigger className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50">
+                  <SelectValue placeholder="Chọn loại" />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50">
+                  <SelectItem value="Profile">Profile</SelectItem>
+                  <SelectItem value="Page">Page</SelectItem>
+                  <SelectItem value="Group">Group</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="submit"
+              onClick={handleSaveEdit}
+              className="bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-200"
+            >
+              Lưu thay đổi
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50">
+          <DialogHeader>
+            <DialogTitle className="text-gray-900 dark:text-gray-50">Tạo mới Account</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
