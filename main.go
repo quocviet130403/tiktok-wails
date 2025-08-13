@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"tiktok-wails/backend"
+	"tiktok-wails/backend/initialize"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -14,10 +15,23 @@ var assets embed.FS
 
 func main() {
 	// Create an instance of the app structure
-	app := backend.NewApp()
+
+	dbInit, err := initialize.InitDatabase()
+	if err != nil {
+		println("Error initializing database:", err.Error())
+		return
+	}
+
+	err = initialize.InitServer(dbInit)
+	if err != nil {
+		println("Error initializing server:", err.Error())
+		return
+	}
+
+	app := backend.NewApp(dbInit)
 
 	// Create application with options
-	err := wails.Run(&options.App{
+	err = wails.Run(&options.App{
 		Title:  "tiktok-wails",
 		Width:  1024,
 		Height: 768,
