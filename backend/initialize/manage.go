@@ -2,17 +2,10 @@ package initialize
 
 import (
 	"database/sql"
-	"tiktok-wails/backend/manage"
+	"tiktok-wails/backend/manage/implement"
+	"tiktok-wails/backend/manage/service"
 )
-
-var (
-	localVideoManager *manage.VideoManager
-)
-
-func VideoManager() *manage.VideoManager {
-	return localVideoManager
-}
 
 func InitManage(db *sql.DB) {
-	localVideoManager = manage.NewVideoManager(db)
+	service.InitVideoManager(implement.NewVideoManager(db))
 }

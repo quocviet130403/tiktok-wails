@@ -1,4 +1,4 @@
-package manage
+package implement
 
 import (
 	"context"
@@ -58,7 +58,7 @@ func (vm *VideoManager) LoginTiktok(temdir string) error {
 	return nil
 }
 
-func (vm *VideoManager) UploadVideo(profile, video, title string) {
+func (vm *VideoManager) UploadVideo(profile, video, title string) error {
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.ExecPath(global.PathAppChrome),                         // chỉnh lại nếu cần
 		chromedp.Flag("headless", false),                                // hiển thị trình duyệt
@@ -166,7 +166,10 @@ func (vm *VideoManager) UploadVideo(profile, video, title string) {
 
 	if err != nil {
 		log.Fatalf("Lỗi khi điều hướng đến trang chính: %v", err)
+		return err
 	}
+
+	return nil
 
 }
 
