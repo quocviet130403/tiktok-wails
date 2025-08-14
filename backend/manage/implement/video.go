@@ -174,15 +174,15 @@ func (vm *VideoManager) UploadVideo(profile, video, title string) error {
 
 }
 
-func (vm *VideoManager) AddVideo(title, videoURL, thumbnailURL string, duration int, likeCount int, accountID int) error {
-	insertSQL := `INSERT INTO videos (title, video_url, thumbnail_url, duration, like_count, account_id) VALUES (?, ?, ?, ?, ?, ?)`
-	_, err := vm.db.Exec(insertSQL, title, videoURL, thumbnailURL, duration, likeCount, accountID)
+func (vm *VideoManager) AddVideo(title, videoURL, thumbnailURL string, duration int, likeCount int, profileDouyinID int) error {
+	insertSQL := `INSERT INTO videos (title, video_url, thumbnail_url, duration, like_count, profile_douyin_id) VALUES (?, ?, ?, ?, ?, ?)`
+	_, err := vm.db.Exec(insertSQL, title, videoURL, thumbnailURL, duration, likeCount, profileDouyinID)
 	return err
 }
 
 func (vm *VideoManager) GetAllVideos(page int, pageSize int) ([]service.Video, error) {
 	offset := (page - 1) * pageSize
-	query := `SELECT id, title, video_url, thumbnail_url, duration, like_count, account_id, status FROM videos LIMIT ? OFFSET ?`
+	query := `SELECT id, title, video_url, thumbnail_url, duration, like_count, profile_douyin_id, status FROM videos LIMIT ? OFFSET ?`
 	rows, err := vm.db.Query(query, pageSize, offset)
 	if err != nil {
 		return nil, err
@@ -193,7 +193,7 @@ func (vm *VideoManager) GetAllVideos(page int, pageSize int) ([]service.Video, e
 	for rows.Next() {
 		var video service.Video
 		if err := rows.Scan(&video.ID, &video.Title, &video.VideoURL, &video.ThumbnailURL,
-			&video.Duration, &video.LikeCount, &video.AccountID, &video.Status); err != nil {
+			&video.Duration, &video.LikeCount, &video.ProfileDouyinID, &video.Status); err != nil {
 			return nil, err
 		}
 		videos = append(videos, video)

@@ -7,25 +7,38 @@ import (
 )
 
 func InitDatabase() (*sql.DB, error) {
-	db, err := sql.Open("sqlite", "accounts.db")
+	db, err := sql.Open("sqlite", "wails.db")
 	if err != nil {
 		return nil, err
 	}
 
 	// Tạo bảng nếu chưa tồn tại
-	createTableSQL := `
-    CREATE TABLE IF NOT EXISTS accounts (
+	createProfileTableSQL := `
+    CREATE TABLE IF NOT EXISTS profiles (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        url_reup TEXT NOT NULL,
         hashtag TEXT NOT NULL,
         first_comment TEXT NOT NULL,
-		last_video_reup TEXT,
-		retry_count INTEGER DEFAULT 0,
 		is_authenticated BOOLEAN DEFAULT FALSE
     );`
 
-	_, err = db.Exec(createTableSQL)
+	_, err = db.Exec(createProfileTableSQL)
+	if err != nil {
+		return nil, err
+	}
+
+	createProfileDouyinTableSQL := `
+	CREATE TABLE IF NOT EXISTS profile_douyin (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		account_id INTEGER,
+		nickname TEXT NOT NULL,
+		url TEXT NOT NULL,
+		last_video_reup TEXT,
+		retry_count INTEGER DEFAULT 0,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);`
+
+	_, err = db.Exec(createProfileDouyinTableSQL)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +50,7 @@ func InitDatabase() (*sql.DB, error) {
 		title TEXT NOT NULL,
 		video_url TEXT NOT NULL,
 		thumbnail_url TEXT,
-		account_id INTEGER,
+		profile_douyin_id INTEGER,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		duration INTEGER,
 		status TEXT DEFAULT 'pending',
