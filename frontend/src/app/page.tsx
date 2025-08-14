@@ -69,9 +69,9 @@ export default function Home() {
         </div>
       </div>
       <div className="bottom-status-bar">
-        <div className="status-left">
+        {/* <div className="status-left">
           <span className="font-medium">Đỗ Hữu Ben (Vĩnh viễn)</span>
-        </div>
+        </div> */}
         <div className="status-right">
           <div className="checkbox-group">
             <input type="checkbox" id="auto-delete" className="custom-checkbox" />
