@@ -1,5 +1,25 @@
 export namespace service {
 	
+	export class ProfileDouyin {
+	    id: number;
+	    nickname: string;
+	    url: string;
+	    last_video_reup: string;
+	    retry_count: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ProfileDouyin(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.nickname = source["nickname"];
+	        this.url = source["url"];
+	        this.last_video_reup = source["last_video_reup"];
+	        this.retry_count = source["retry_count"];
+	    }
+	}
 	export class Profiles {
 	    id: number;
 	    name: string;
