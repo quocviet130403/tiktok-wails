@@ -8,122 +8,116 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label"
 import { Edit, Trash2, Plus } from "lucide-react"
 // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { GetAllAccounts, AddAccount, UpdateAccount, DeleteAccount } from "../../wailsjs/go/backend/App"
+import { GetAllProfiles, AddProfile, UpdateProfile, DeleteProfile } from "../../wailsjs/go/backend/App"
 
-interface Account {
+interface Profile {
   id: number
   name: string
-  url_reup: string
   hashtag: string
   first_comment: string
 }
 
-export function AccountTab() {
+export function ProfileTab() {
 
-  const [accounts, setAccounts] = useState<any[]>([])
+  const [profiles, setProfiles] = useState<any[]>([])
 
-  const fetchAccounts = async () => {
-    const result = await GetAllAccounts()
+  const fetchProfiles = async () => {
+    const result = await GetAllProfiles()
     if (result) {
-      setAccounts(result)
+      setProfiles(result)
     }
   }
 
   useEffect(() => {
-    fetchAccounts()
+    fetchProfiles()
   }, [])
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [currentAccount, setCurrentAccount] = useState<Account | null>(null)
+  const [currentProfile, setCurrentProfile] = useState<Profile | null>(null)
   const [editPost, setEditPost] = useState({
     name: "",
-    urlReup: "",
     hashtag: "",
     firstComment: "",
   })
   const [createPost, setCreatePost] = useState({
     name: "",
-    urlReup: "",
     hashtag: "",
     firstComment: "",
   })
 
-  const handleEdit = (account: Account) => {
-    setCurrentAccount(account)
+  const handleEdit = (profile: Profile) => {
+    setCurrentProfile(profile)
     setEditPost({
-      name: account.name,
-      urlReup: account.url_reup,
-      hashtag: account.hashtag,
-      firstComment: account.first_comment,
+      name: profile.name,
+      hashtag: profile.hashtag,
+      firstComment: profile.first_comment,
     })
     setIsEditDialogOpen(true)
   }
 
   const handleDelete = (id: number) => {
-    DeleteAccount(id)
+    DeleteProfile(id)
       .then(() => {
-        fetchAccounts()
+        fetchProfiles()
       })
-      .catch((error) => {
-        console.error("Error deleting account:", error)
+      .catch((error: any) => {
+        console.error("Error deleting profile:", error)
       })
   }
 
   const handleSaveEdit = () => {
-    if (currentAccount) {
+    if (currentProfile) {
 
-      UpdateAccount(currentAccount.id, editPost.name, editPost.urlReup, editPost.hashtag, editPost.firstComment)
+      UpdateProfile(currentProfile.id, editPost.name, editPost.hashtag, editPost.firstComment)
         .then(() => {
-          fetchAccounts()
+          fetchProfiles()
           setIsEditDialogOpen(false)
-          setCurrentAccount(null)
+          setCurrentProfile(null)
           setEditPost({
             name: "",
-            urlReup: "",
             hashtag: "",
             firstComment: "",
           })
         })
-        .catch((error) => {
-          console.error("Error updating account:", error)
+        .catch((error: any) => {
+          console.error("Error updating profile:", error)
         })
     }
   }
 
   const handleSaveCreate = () => {
-    console.log("Creating new account with data:", createPost)
+    console.log("Creating new profile with data:", createPost)
 
-    AddAccount(createPost.name, createPost.urlReup, createPost.hashtag, createPost.firstComment)
+    AddProfile(createPost.name, createPost.hashtag, createPost.firstComment)
     .then(() => {
-      console.log("Account created successfully")
-      fetchAccounts()
+      console.log("Profile created successfully")
+      fetchProfiles()
       
       setCreatePost({
         name: "",
-        urlReup: "",
         hashtag: "",
         firstComment: "",
       })
       
       setIsCreateDialogOpen(false)
     })
-    .catch((error) => {
-      console.error("Error creating account:", error)
+    .catch((error: any) => {
+      console.error("Error creating profile:", error)
     })
   }
 
   // const handleMove = (id: string, direction: "up" | "down") => {
-  //   const index = accounts.findIndex((acc) => acc.id === id)
+  //   const index = profiles.findIndex((acc) => acc.id === id)
   //   if (index === -1) return
 
-  //   const newAccounts = [...accounts]
+  //   const newProfiles = [...profiles]
   //   if (direction === "up" && index > 0) {
-  //     ;[newAccounts[index - 1], newAccounts[index]] = [newAccounts[index], newAccounts[index - 1]]
-  //   } else if (direction === "down" && index < newAccounts.length - 1) {
-  //     ;[newAccounts[index + 1], newAccounts[index]] = [newAccounts[index], newAccounts[index + 1]]
+  //     ;[newProfiles[index - 1], newProfiles[index]] = [newProfiles[index], newProfiles[index - 1]]
+  //   } else if (direction === "down" && index < newProfiles.length - 1) {
+  //     ;[newProfiles[index + 1], newProfiles[index]] = [newProfiles[index], newProfiles[index + 1]]
   //   }
-  //   setAccounts(newAccounts)
+  //   setProfiles(newProfiles)
   // }
 
   return (
@@ -131,11 +125,11 @@ export function AccountTab() {
       <div className="flex items-center gap-2 mb-4 p-2 border rounded-md bg-gray-50 dark:bg-gray-700">
         {/* <Select defaultValue="Ben Hữu Đỗ (dohuubenbmt@...)">
           <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50">
-            <SelectValue placeholder="Select an account" />
+            <SelectValue placeholder="Select an profile" />
           </SelectTrigger>
           <SelectContent className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50">
             <SelectItem value="Ben Hữu Đỗ (dohuubenbmt@...)">Ben Hữu Đỗ (dohuubenbmt@...)</SelectItem>
-            <SelectItem value="Account 2">Account 2</SelectItem>
+            <SelectItem value="Profile 2">Profile 2</SelectItem>
           </SelectContent>
         </Select> */}
         {/* <Button
@@ -193,18 +187,18 @@ export function AccountTab() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {accounts.map((account) => (
+            {profiles.map((profile) => (
               <TableRow
-                key={account.id}
+                key={profile.id}
                 className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
               >
-                <TableCell className="font-medium text-gray-800 dark:text-gray-200">{account.id}</TableCell>
-                <TableCell className="text-gray-800 dark:text-gray-200">{account.name}</TableCell>
+                <TableCell className="font-medium text-gray-800 dark:text-gray-200">{profile.id}</TableCell>
+                <TableCell className="text-gray-800 dark:text-gray-200">{profile.name}</TableCell>
                 <TableCell className="text-center flex items-center justify-center gap-1">
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleEdit(account)}
+                    onClick={() => handleEdit(profile)}
                     className="hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
                   >
                     <Edit className="h-4 w-4 text-blue-500" />
@@ -213,7 +207,7 @@ export function AccountTab() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleDelete(account.id)}
+                    onClick={() => handleDelete(profile.id)}
                     className="hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
                   >
                     <Trash2 className="h-4 w-4 text-red-500" />
@@ -223,7 +217,7 @@ export function AccountTab() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleMove(account.id, "up")}
+                      onClick={() => handleMove(profile.id, "up")}
                       className="h-6 w-6 p-0 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
                     >
                       <ChevronUp className="h-3 w-3" />
@@ -232,7 +226,7 @@ export function AccountTab() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleMove(account.id, "down")}
+                      onClick={() => handleMove(profile.id, "down")}
                       className="h-6 w-6 p-0 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
                     >
                       <ChevronDown className="h-3 w-3" />
@@ -249,7 +243,7 @@ export function AccountTab() {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50">
           <DialogHeader>
-            <DialogTitle className="text-gray-900 dark:text-gray-50">Chỉnh sửa Account</DialogTitle>
+            <DialogTitle className="text-gray-900 dark:text-gray-50">Chỉnh sửa Profile</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -260,17 +254,6 @@ export function AccountTab() {
                 id="name"
                 value={editPost?.name}
                 onChange={(e) => setEditPost({ ...editPost, name: e.target.value })}
-                className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="url_reup" className="text-right text-gray-700 dark:text-gray-300">
-                URL Reup
-              </Label>
-              <Input
-                id="url_reup"
-                value={editPost?.urlReup}
-                onChange={(e) => setEditPost({ ...editPost, urlReup: e.target.value })}
                 className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
               />
             </div>
@@ -311,7 +294,7 @@ export function AccountTab() {
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50">
           <DialogHeader>
-            <DialogTitle className="text-gray-900 dark:text-gray-50">Tạo mới Account</DialogTitle>
+            <DialogTitle className="text-gray-900 dark:text-gray-50">Tạo mới Profile</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -322,17 +305,6 @@ export function AccountTab() {
                 id="name"
                 value={createPost.name}
                 onChange={(e) => setCreatePost({ ...createPost, name: e.target.value })}
-                className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="url_reup" className="text-right text-gray-700 dark:text-gray-300">
-                URL Reup
-              </Label>
-              <Input
-                id="url_reup"
-                value={createPost.urlReup}
-                onChange={(e) => setCreatePost({ ...createPost, urlReup: e.target.value })}
                 className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
               />
             </div>

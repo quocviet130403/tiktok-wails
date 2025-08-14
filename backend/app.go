@@ -22,16 +22,16 @@ func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-// Accounts
-func (a *App) GetAllAccounts() []service.Profiles {
-	accounts, err := service.ProfileManager().GetAllProfiles()
+// Profiles
+func (a *App) GetAllProfiles() []service.Profiles {
+	profiles, err := service.ProfileManager().GetAllProfiles()
 	if err != nil {
 		return nil
 	}
-	return accounts
+	return profiles
 }
 
-func (a *App) AddAccount(name, hashtag, firstComment string) error {
+func (a *App) AddProfile(name, hashtag, firstComment string) error {
 	err := service.ProfileManager().AddProfile(name, hashtag, firstComment)
 	if err != nil {
 		return err
@@ -39,7 +39,7 @@ func (a *App) AddAccount(name, hashtag, firstComment string) error {
 	return nil
 }
 
-func (a *App) UpdateAccount(id int, name, hashtag, firstComment string) error {
+func (a *App) UpdateProfile(id int, name, hashtag, firstComment string) error {
 	err := service.ProfileManager().UpdateProfile(id, name, hashtag, firstComment)
 	if err != nil {
 		return err
@@ -47,7 +47,7 @@ func (a *App) UpdateAccount(id int, name, hashtag, firstComment string) error {
 	return nil
 }
 
-func (a *App) DeleteAccount(id int) error {
+func (a *App) DeleteProfile(id int) error {
 	err := service.ProfileManager().DeleteProfile(id)
 	if err != nil {
 		return err

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { MainHeader } from "@/components/main-header"
-import { AccountTab } from "@/components/account-tab"
+import { ProfileTab } from "@/components/account-tab"
 import { VideoTab } from "@/components/video-tab"
 import { SettingsTab } from "@/components/settings-tab"
 import "./globals.css" // Import global CSS
@@ -62,7 +62,7 @@ export default function Home() {
             </button>
           </div>
           <div className="tabs-content">
-            {activeTab === "account" && <AccountTab />}
+            {activeTab === "account" && <ProfileTab />}
             {activeTab === "video" && <VideoTab />}
             {activeTab === "settings" && <SettingsTab />}
           </div>

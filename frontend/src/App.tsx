@@ -4,9 +4,9 @@ import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ThemeProvider } from "@/components/theme-provider"
 import { MainHeader } from "@/components/main-header"
-import { AccountTab } from "@/components/account-tab"
 import { VideoTab } from "@/components/video-tab"
 import { SettingsTab } from "@/components/settings-tab"
+import { ProfileTab } from "@/components/account-tab"
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("account")
@@ -43,7 +43,7 @@ export default function App() {
               value="account"
               className="flex-1 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-auto"
             >
-              <AccountTab />
+              <ProfileTab />
             </TabsContent>
             <TabsContent
               value="video"
