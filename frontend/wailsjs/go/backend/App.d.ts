@@ -8,4 +8,6 @@ export function DeleteAccount(arg1:number):Promise<void>;
 
 export function GetAllAccounts():Promise<Array<service.Accounts>>;
 
+export function GetAllVideos(arg1:number,arg2:number):Promise<Array<service.Video>>;
+
 export function UpdateAccount(arg1:number,arg2:string,arg3:string,arg4:string,arg5:string):Promise<void>;

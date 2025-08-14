@@ -22,7 +22,7 @@ func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-// GetAllAccounts returns a list of all accounts
+// Accounts
 func (a *App) GetAllAccounts() []service.Accounts {
 	accounts, err := service.AccountManager().GetAllAccounts()
 	if err != nil {
@@ -53,4 +53,13 @@ func (a *App) DeleteAccount(id int) error {
 		return err
 	}
 	return nil
+}
+
+// Videos
+func (a *App) GetAllVideos(page int, pageSize int) ([]service.Video, error) {
+	videos, err := service.VideoManager().GetAllVideos(page, pageSize)
+	if err != nil {
+		return nil, err
+	}
+	return videos, nil
 }

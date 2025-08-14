@@ -26,6 +26,32 @@ export namespace service {
 	        this.is_authenticated = source["is_authenticated"];
 	    }
 	}
+	export class Video {
+	    ID: number;
+	    Title: string;
+	    VideoURL: string;
+	    ThumbnailURL: string;
+	    Duration: number;
+	    LikeCount: number;
+	    AccountID: number;
+	    Status: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Video(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ID = source["ID"];
+	        this.Title = source["Title"];
+	        this.VideoURL = source["VideoURL"];
+	        this.ThumbnailURL = source["ThumbnailURL"];
+	        this.Duration = source["Duration"];
+	        this.LikeCount = source["LikeCount"];
+	        this.AccountID = source["AccountID"];
+	        this.Status = source["Status"];
+	    }
+	}
 
 }
 

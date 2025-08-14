@@ -14,6 +14,10 @@ export function GetAllAccounts() {
   return window['go']['backend']['App']['GetAllAccounts']();
 }
 
+export function GetAllVideos(arg1, arg2) {
+  return window['go']['backend']['App']['GetAllVideos'](arg1, arg2);
+}
+
 export function UpdateAccount(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['backend']['App']['UpdateAccount'](arg1, arg2, arg3, arg4, arg5);
 }

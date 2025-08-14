@@ -40,6 +40,7 @@ func InitDatabase() (*sql.DB, error) {
 		account_id INTEGER,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		duration INTEGER,
+		status TEXT DEFAULT 'pending',
 		like_count INTEGER DEFAULT 0
 	);`
 	_, err = db.Exec(createVideosTableSQL)

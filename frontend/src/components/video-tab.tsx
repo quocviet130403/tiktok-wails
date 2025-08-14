@@ -1,159 +1,42 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Edit, Trash2, Play } from "lucide-react"
+import { GetAllVideos } from "../../wailsjs/go/backend/App"
 
 interface Video {
-  id: string
-  title: string
-  description: string
-  duration: string
-  thumbnail: string
-  schedule: string
-  account: string
-  status: string
-  download: string
-  render: string
-  upload: string
+  id:           number
+	title:        string
+	videoURL:     string
+	thumbnailURL: string
+	duration:     number
+	likeCount:    number
+	accountID:    number
+	status:       string
 }
 
 export function VideoTab() {
-  const [videos, setVideos] = useState<Video[]>([
-    {
-      id: "1",
-      title: "Jonas Blue and Sabrina Carpenter Live ...",
-      description: "Alien with Sabrina Carpe...",
-      duration: "00:01:38",
-      thumbnail: "https://i.ytimg.com/vi/...",
-      schedule: "None",
-      account: "",
-      status: "Not Start",
-      download: "0%",
-      render: "0%",
-      upload: "0%",
-    },
-    {
-      id: "2",
-      title: "ONLY THE BRAVE by DIESEL",
-      description: "Join us to meet the brav...",
-      duration: "00:00:50",
-      thumbnail: "https://i.ytimg.com/vi/...",
-      schedule: "None",
-      account: "",
-      status: "Not Start",
-      download: "0%",
-      render: "0%",
-      upload: "0%",
-    },
-    {
-      id: "3",
-      title: "Jonas Blue Explores Hong Kong with A...",
-      description: "When American Airlines ...",
-      duration: "00:05:23",
-      thumbnail: "https://i.ytimg.com/vi/...",
-      schedule: "None",
-      account: "",
-      status: "Not Start",
-      download: "0%",
-      render: "0%",
-      upload: "0%",
-    },
-    {
-      id: "4",
-      title: "Jonas Blue's #MarimbaMama",
-      description: "Time to get creative guy...",
-      duration: "00:03:08",
-      thumbnail: "https://i.ytimg.com/vi/...",
-      schedule: "None",
-      account: "",
-      status: "Not Start",
-      download: "0%",
-      render: "0%",
-      upload: "0%",
-    },
-    {
-      id: "5",
-      title: "Jonas Blue Live at Heaven London",
-      description: "Such a special experienc...",
-      duration: "00:02:48",
-      thumbnail: "https://i.ytimg.com/vi/...",
-      schedule: "None",
-      account: "",
-      status: "Not Start",
-      download: "0%",
-      render: "0%",
-      upload: "0%",
-    },
-    {
-      id: "6",
-      title: "Jonas Blue in France & Germany June 2...",
-      description: "Fun times last weekend i...",
-      duration: "00:01:42",
-      thumbnail: "https://i.ytimg.com/vi/...",
-      schedule: "None",
-      account: "",
-      status: "Not Start",
-      download: "0%",
-      render: "0%",
-      upload: "0%",
-    },
-    {
-      id: "7",
-      title: "Jonas Blue at Ministry Of Sound 2017",
-      description: "So sick to have my first ...",
-      duration: "00:01:22",
-      thumbnail: "https://i.ytimg.com/vi/...",
-      schedule: "None",
-      account: "",
-      status: "Not Start",
-      download: "0%",
-      render: "0%",
-      upload: "0%",
-    },
-    {
-      id: "8",
-      title: "Jonas Blue at Lollapalooza Berlin 2016",
-      description: "Had such an awesome b...",
-      duration: "00:00:59",
-      thumbnail: "https://i.ytimg.com/vi/...",
-      schedule: "None",
-      account: "",
-      status: "Not Start",
-      download: "0%",
-      render: "0%",
-      upload: "0%",
-    },
-    {
-      id: "9",
-      title: "Jonas Blue at V Festival 2016",
-      description: "An awesome recap of a ...",
-      duration: "00:01:01",
-      thumbnail: "https://i.ytimg.com/vi/...",
-      schedule: "None",
-      account: "",
-      status: "Not Start",
-      download: "0%",
-      render: "0%",
-      upload: "0%",
-    },
-    {
-      id: "10",
-      title: "Jonas Blue - David Guetta Listen Tour S...",
-      description: "A huge moment for me ...",
-      duration: "00:01:10",
-      thumbnail: "https://i.ytimg.com/vi/...",
-      schedule: "None",
-      account: "",
-      status: "Not Start",
-      download: "0%",
-      render: "0%",
-      upload: "0%",
-    },
-  ])
+  const [videos, setVideos] = useState<any[]>([])
 
-  const handleDelete = (id: string) => {
+  const [pagination, _] = useState({
+    page: 1,
+    pageSize: 20,
+  })
+
+  const fetchVideos = async () => {
+    const result = await GetAllVideos(pagination.page, pagination.pageSize)
+    if (result) {
+      setVideos(result)
+    }
+  }
+
+  useEffect(() => {
+    fetchVideos()
+  }, [])
+
+  const handleDelete = (id: number) => {
     setVideos(videos.filter((video) => video.id !== id))
   }
 
@@ -195,15 +78,11 @@ export function VideoTab() {
                   <span className="ml-1">{index + 1}</span>
                 </TableCell>
                 <TableCell className="font-medium text-gray-800 dark:text-gray-200">{video.title}</TableCell>
-                <TableCell className="text-gray-800 dark:text-gray-200">{video.description}</TableCell>
                 <TableCell className="text-gray-800 dark:text-gray-200">{video.duration}</TableCell>
-                <TableCell className="text-gray-800 dark:text-gray-200">{video.thumbnail}</TableCell>
-                <TableCell className="text-gray-800 dark:text-gray-200">{video.schedule}</TableCell>
-                <TableCell className="text-gray-800 dark:text-gray-200">{video.account}</TableCell>
+                <TableCell className="text-gray-800 dark:text-gray-200">{video.thumbnailURL}</TableCell>
+                <TableCell className="text-gray-800 dark:text-gray-200">{video.accountID}</TableCell>
+                <TableCell className="text-gray-800 dark:text-gray-200">{video.likeCount}</TableCell>
                 <TableCell className="text-gray-800 dark:text-gray-200">{video.status}</TableCell>
-                <TableCell className="text-gray-800 dark:text-gray-200">{video.download}</TableCell>
-                <TableCell className="text-gray-800 dark:text-gray-200">{video.render}</TableCell>
-                <TableCell className="text-gray-800 dark:text-gray-200">{video.upload}</TableCell>
                 <TableCell className="text-center">
                   <Button
                     variant="ghost"

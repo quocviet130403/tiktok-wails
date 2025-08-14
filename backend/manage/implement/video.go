@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"tiktok-wails/backend/global"
+	"tiktok-wails/backend/manage/service"
 	"time"
 
 	"github.com/chromedp/chromedp"
@@ -177,4 +178,26 @@ func (vm *VideoManager) AddVideo(title, videoURL, thumbnailURL string, duration 
 	insertSQL := `INSERT INTO videos (title, video_url, thumbnail_url, duration, like_count, account_id) VALUES (?, ?, ?, ?, ?, ?)`
 	_, err := vm.db.Exec(insertSQL, title, videoURL, thumbnailURL, duration, likeCount, accountID)
 	return err
+}
+
+func (vm *VideoManager) GetAllVideos(page int, pageSize int) ([]service.Video, error) {
+	offset := (page - 1) * pageSize
+	query := `SELECT id, title, video_url, thumbnail_url, duration, like_count, account_id, status FROM videos LIMIT ? OFFSET ?`
+	rows, err := vm.db.Query(query, pageSize, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var videos []service.Video
+	for rows.Next() {
+		var video service.Video
+		if err := rows.Scan(&video.ID, &video.Title, &video.VideoURL, &video.ThumbnailURL,
+			&video.Duration, &video.LikeCount, &video.AccountID, &video.Status); err != nil {
+			return nil, err
+		}
+		videos = append(videos, video)
+	}
+
+	return videos, nil
 }
