@@ -2,6 +2,7 @@ package backend
 
 import (
 	"context"
+	"tiktok-wails/backend/manage/service"
 )
 
 // App struct
@@ -22,6 +23,34 @@ func (a *App) Startup(ctx context.Context) {
 }
 
 // GetAllAccounts returns a list of all accounts
-func (a *App) GetAllAccounts() []string {
-	return []string{"Account1", "Account2", "Account3"}
+func (a *App) GetAllAccounts() []service.Accounts {
+	accounts, err := service.AccountManager().GetAllAccounts()
+	if err != nil {
+		return nil
+	}
+	return accounts
+}
+
+func (a *App) AddAccount(name, urlReup, hashtag, firstComment string) error {
+	err := service.AccountManager().AddAccount(name, urlReup, hashtag, firstComment)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *App) UpdateAccount(id int, name, urlReup, hashtag, firstComment string) error {
+	err := service.AccountManager().UpdateAccount(id, name, urlReup, hashtag, firstComment)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *App) DeleteAccount(id int) error {
+	err := service.AccountManager().DeleteAccount(id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

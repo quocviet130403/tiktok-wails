@@ -27,7 +27,7 @@ func (am *AccountManager) DeleteAccount(id int) error {
 	return err
 }
 
-func (am *AccountManager) AddAccount(name, urlReup, hashtag, firstComment, lastVideoReup string, retryCount int, isAuthenticated bool) error {
+func (am *AccountManager) AddAccount(name, urlReup, hashtag, firstComment string) error {
 	// Bắt đầu transaction
 	tx, err := am.db.Begin()
 	if err != nil {
@@ -45,7 +45,7 @@ func (am *AccountManager) AddAccount(name, urlReup, hashtag, firstComment, lastV
 			tx.Rollback()
 		}
 	}()
-
+	isAuthenticated := false
 	// Thử đăng nhập TikTok
 	err = service.VideoManager().LoginTiktok(name)
 	if err == nil {
@@ -54,7 +54,7 @@ func (am *AccountManager) AddAccount(name, urlReup, hashtag, firstComment, lastV
 
 	// Thực hiện insert trong transaction
 	insertSQL := `INSERT INTO accounts (name, url_reup, hashtag, first_comment, last_video_reup, retry_count, is_authenticated) VALUES (?, ?, ?, ?, ?, ?, ?)`
-	_, err = tx.Exec(insertSQL, name, urlReup, hashtag, firstComment, lastVideoReup, retryCount, isAuthenticated)
+	_, err = tx.Exec(insertSQL, name, urlReup, hashtag, firstComment, "", 0, isAuthenticated)
 	if err != nil {
 		return fmt.Errorf("lỗi khi thêm tài khoản: %w", err)
 	}
@@ -66,4 +66,29 @@ func (am *AccountManager) AddAccount(name, urlReup, hashtag, firstComment, lastV
 	}
 
 	return nil
+}
+
+func (am *AccountManager) GetAllAccounts() ([]service.Accounts, error) {
+	rows, err := am.db.Query("SELECT id, name, url_reup, hashtag, first_comment, last_video_reup, retry_count, is_authenticated FROM accounts")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var accounts []service.Accounts
+
+	for rows.Next() {
+		var account service.Accounts
+		err := rows.Scan(&account.ID, &account.Name, &account.UrlReup, &account.Hashtag, &account.FirstComment, &account.LastVideoReup, &account.RetryCount, &account.IsAuthenticated)
+		if err != nil {
+			return nil, err
+		}
+		accounts = append(accounts, account)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return accounts, nil
 }
