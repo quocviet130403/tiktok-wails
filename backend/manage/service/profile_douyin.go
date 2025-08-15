@@ -13,6 +13,7 @@ type ProfileDouyinInterface interface {
 	DeleteProfile(id int) error
 	AddProfile(account_id int, nickname, url, last_video_reup string, retry_count int) error
 	GetAllProfiles() ([]ProfileDouyin, error)
+	AccessProfile(profile ProfileDouyin) error
 }
 
 var (
