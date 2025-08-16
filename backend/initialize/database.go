@@ -10,9 +10,9 @@ const (
 	KEY_PATH_CHROME     = "path_chrome"
 	VALUE_PATH_CHROME   = "C:/Program Files/Google/Chrome/Application/chrome.exe"
 	KEY_SCHEDULE_TIME   = "schedule_time"
-	VALUE_SCHEDULE_TIME = "1"
+	VALUE_SCHEDULE_TIME = "daily"
 	KEY_RUN_AT_TIME     = "run_at_time"
-	VALUE_RUN_AT_TIME   = "00:00:00"
+	VALUE_RUN_AT_TIME   = "24"
 )
 
 func InitDatabase() (*sql.DB, error) {

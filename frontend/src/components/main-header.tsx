@@ -175,13 +175,13 @@ export function MainHeader(_props: MainHeaderProps) {
               defaultValue="Mỗi ngày"
               className="w-24 h-8 text-center bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
             /> */}
-            <Select>
+            <Select value={"daily"}>
               <SelectTrigger className="w-30 h-8 text-center bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50">
                 <SelectValue placeholder="Select time" />
               </SelectTrigger>
               <SelectContent className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50">
-                <SelectItem value="1">Every Day</SelectItem>
-                <SelectItem value="7">Every Week</SelectItem>
+                <SelectItem value="daily">Every Day</SelectItem>
+                {/* <SelectItem value="weekly">Every Week</SelectItem> */}
               </SelectContent>
             </Select>
           </div>
@@ -193,35 +193,35 @@ export function MainHeader(_props: MainHeaderProps) {
               defaultValue="Mỗi ngày"
               className="w-24 h-8 text-center bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
             /> */}
-            <Select>
+            <Select value={"24"}>
               <SelectTrigger className="w-30 h-8 text-center bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50">
                 <SelectValue placeholder="Select time" />
               </SelectTrigger>
               <SelectContent className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50">
-                <SelectItem value="00:00:00">00:00:00</SelectItem>
-                <SelectItem value="01:00:00">01:00:00</SelectItem>
-                <SelectItem value="02:00:00">02:00:00</SelectItem>
-                <SelectItem value="03:00:00">03:00:00</SelectItem>
-                <SelectItem value="04:00:00">04:00:00</SelectItem>
-                <SelectItem value="05:00:00">05:00:00</SelectItem>
-                <SelectItem value="06:00:00">06:00:00</SelectItem>
-                <SelectItem value="07:00:00">07:00:00</SelectItem>
-                <SelectItem value="08:00:00">08:00:00</SelectItem>
-                <SelectItem value="09:00:00">09:00:00</SelectItem>
-                <SelectItem value="10:00:00">10:00:00</SelectItem>
-                <SelectItem value="11:00:00">11:00:00</SelectItem>
-                <SelectItem value="12:00:00">12:00:00</SelectItem>
-                <SelectItem value="13:00:00">13:00:00</SelectItem>
-                <SelectItem value="14:00:00">14:00:00</SelectItem>
-                <SelectItem value="15:00:00">15:00:00</SelectItem>
-                <SelectItem value="16:00:00">16:00:00</SelectItem>
-                <SelectItem value="17:00:00">17:00:00</SelectItem>
-                <SelectItem value="18:00:00">18:00:00</SelectItem>
-                <SelectItem value="19:00:00">19:00:00</SelectItem>
-                <SelectItem value="20:00:00">20:00:00</SelectItem>
-                <SelectItem value="21:00:00">21:00:00</SelectItem>
-                <SelectItem value="22:00:00">22:00:00</SelectItem>
-                <SelectItem value="23:00:00">23:00:00</SelectItem>
+                <SelectItem value="24">00:00:00</SelectItem>
+                <SelectItem value="1">01:00:00</SelectItem>
+                <SelectItem value="2">02:00:00</SelectItem>
+                <SelectItem value="3">03:00:00</SelectItem>
+                <SelectItem value="4">04:00:00</SelectItem>
+                <SelectItem value="5">05:00:00</SelectItem>
+                <SelectItem value="6">06:00:00</SelectItem>
+                <SelectItem value="7">07:00:00</SelectItem>
+                <SelectItem value="8">08:00:00</SelectItem>
+                <SelectItem value="9">09:00:00</SelectItem>
+                <SelectItem value="10">10:00:00</SelectItem>
+                <SelectItem value="11">11:00:00</SelectItem>
+                <SelectItem value="12">12:00:00</SelectItem>
+                <SelectItem value="13">13:00:00</SelectItem>
+                <SelectItem value="14">14:00:00</SelectItem>
+                <SelectItem value="15">15:00:00</SelectItem>
+                <SelectItem value="16">16:00:00</SelectItem>
+                <SelectItem value="17">17:00:00</SelectItem>
+                <SelectItem value="18">18:00:00</SelectItem>
+                <SelectItem value="19">19:00:00</SelectItem>
+                <SelectItem value="20">20:00:00</SelectItem>
+                <SelectItem value="21">21:00:00</SelectItem>
+                <SelectItem value="22">22:00:00</SelectItem>
+                <SelectItem value="23">23:00:00</SelectItem>
               </SelectContent>
             </Select>
           </div>

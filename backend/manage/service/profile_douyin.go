@@ -14,6 +14,8 @@ type ProfileDouyinInterface interface {
 	AddProfile(nickname, url string) error
 	GetAllProfiles() ([]ProfileDouyin, error)
 	AccessProfile(profile ProfileDouyin) error
+	GetVideoFromProfile(profile ProfileDouyin) error
+	UpdateLastVideoReup(id int, lastVideoReup any) error
 }
 
 var (

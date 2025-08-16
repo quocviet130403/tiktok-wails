@@ -20,22 +20,24 @@ import (
 	"gocv.io/x/gocv"
 )
 
+type AwemeLists struct {
+	Desc      string `json:"desc"`
+	Duration  int    `json:"duration"`
+	Statistic struct {
+		LikeCount int `json:"digg_count"`
+	} `json:"statistics"`
+	Video struct {
+		PlayAddr struct {
+			URLList []string `json:"url_list"`
+		} `json:"play_addr"`
+		Cover struct {
+			URLList []string `json:"url_list"`
+		} `json:"cover"`
+	} `json:"video"`
+}
+
 type ListVideos struct {
-	AwemeLists []struct {
-		Desc      string `json:"desc"`
-		Duration  int    `json:"duration"`
-		Statistic struct {
-			LikeCount int `json:"digg_count"`
-		} `json:"statistics"`
-		Video struct {
-			PlayAddr struct {
-				URLList []string `json:"url_list"`
-			} `json:"play_addr"`
-			Cover struct {
-				URLList []string `json:"url_list"`
-			} `json:"cover"`
-		} `json:"video"`
-	} `json:"aweme_list"`
+	AwemeLists []AwemeLists `json:"aweme_list"`
 }
 
 // PuzzleCaptchaSolver holds paths to images and provides methods to solve the CAPTCHA.
