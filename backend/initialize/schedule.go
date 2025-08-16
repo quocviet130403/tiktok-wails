@@ -1,0 +1,80 @@
+package initialize
+
+import (
+	"log"
+	"strconv"
+	"tiktok-wails/backend/global"
+	"tiktok-wails/backend/manage/service"
+	"time"
+)
+
+func InitSchedule() {
+	parsedHour, err := strconv.Atoi(global.ScheduleSetting.RunAtTime)
+	if err != nil {
+		log.Printf("Failed to parse VALUE_RUN_AT_TIME: %v", err)
+		return
+	}
+	hour := parsedHour
+
+	// Get Video From Douyin
+	ticker := time.NewTicker(1 * time.Second)
+	go func() {
+		for now := range ticker.C {
+			run := false
+			switch global.ScheduleSetting.Time {
+			case "daily":
+				if now.Hour() == hour {
+					run = true
+				}
+				if run {
+					go func() {
+						profileDouyins, err := service.ProfileDouyinManager().GetAllProfiles()
+						if err != nil {
+							log.Printf("Lỗi khi lấy danh sách profile Douyin: %v", err)
+							return
+						}
+
+						for _, profile := range profileDouyins {
+							go func(profile service.ProfileDouyin) {
+								retry := 0
+								for {
+									err := service.ProfileDouyinManager().GetVideoFromProfile(profile)
+									if err != nil {
+										log.Printf("Lỗi khi lấy video từ profile %s: %v", profile.Nickname, err)
+										retry++
+										if retry >= 3 {
+											log.Printf("Đã thử lại %d lần, bỏ qua profile %s", retry, profile.Nickname)
+											break
+										}
+										time.Sleep(2 * time.Second)
+										continue
+									}
+									break
+								}
+							}(profile)
+						}
+					}()
+				}
+			}
+		}
+	}()
+
+	// Reup Video Auto
+	tickerReup := time.NewTicker(1 * time.Second)
+	go func() {
+		for now := range tickerReup.C {
+			run := false
+			switch global.ScheduleSetting.Time {
+			case "daily":
+				if now.Hour() == hour+2 {
+					run = true
+				}
+				if run {
+					go func() {
+						// logic code
+					}()
+				}
+			}
+		}
+	}()
+}

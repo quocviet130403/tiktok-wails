@@ -13,6 +13,7 @@ const (
 	VALUE_SCHEDULE_TIME = "daily"
 	KEY_RUN_AT_TIME     = "run_at_time"
 	VALUE_RUN_AT_TIME   = "24"
+	MAX_VIDEO_REUP      = 10
 )
 
 func InitDatabase() (*sql.DB, error) {
@@ -74,6 +75,7 @@ func InitDatabase() (*sql.DB, error) {
 	}
 
 	// tạo thêm table videos
+	// status is "done" || "pending"
 	createVideosTableSQL := `
 	CREATE TABLE IF NOT EXISTS videos (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -116,6 +118,19 @@ func InitDatabase() (*sql.DB, error) {
 	}
 
 	_, err = db.Exec("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", KEY_RUN_AT_TIME, VALUE_RUN_AT_TIME)
+	if err != nil {
+		return nil, err
+	}
+
+	// them bảng reup voi video
+	createReupTableSQL := `
+	CREATE TABLE IF NOT EXISTS reup_videos (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		video_id INTEGER NOT NULL,
+		profile_id INTEGER NOT NULL
+	);`
+
+	_, err = db.Exec(createReupTableSQL)
 	if err != nil {
 		return nil, err
 	}

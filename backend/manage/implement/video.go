@@ -201,3 +201,29 @@ func (vm *VideoManager) GetAllVideos(page int, pageSize int) ([]service.Video, e
 
 	return videos, nil
 }
+
+// func (vm *VideoManager) GetVideoReup(profile_id int) ([]service.Video, error) {
+// 	query := `
+// 	SELECT id, title, video_url, thumbnail_url, duration, like_count, profile_douyin_id, status FROM videos
+// 	WHERE profile_douyin_id IN (
+// 		SELECT id FROM profile_douyin WHERE profile_id = ?
+// 	)
+// 	`
+// 	rows, err := vm.db.Query(query, profile_id)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer rows.Close()
+
+// 	var videos []service.Video
+// 	for rows.Next() {
+// 		var video service.Video
+// 		if err := rows.Scan(&video.ID, &video.Title, &video.VideoURL, &video.ThumbnailURL,
+// 			&video.Duration, &video.LikeCount, &video.ProfileDouyinID, &video.Status); err != nil {
+// 			return nil, err
+// 		}
+// 		videos = append(videos, video)
+// 	}
+
+// 	return videos, nil
+// }
