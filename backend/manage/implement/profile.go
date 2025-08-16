@@ -50,6 +50,8 @@ func (am *ProfileManager) AddProfile(name, hashtag, firstComment, proxy_ip, prox
 	err = service.VideoManager().LoginTiktok(name)
 	if err == nil {
 		isAuthenticated = true
+	} else {
+		fmt.Println("Log err:", err)
 	}
 
 	// Thực hiện insert trong transaction

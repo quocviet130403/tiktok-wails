@@ -2,6 +2,7 @@ package initialize
 
 import (
 	"database/sql"
+	"fmt"
 	"os"
 	"tiktok-wails/backend/global"
 )
@@ -20,11 +21,12 @@ func InitGlobal(db *sql.DB) error {
 	}
 	defer pathChrome.Close()
 
+	global.PathAppChrome = VALUE_DEFAULT_PATH_CHROME
 	if pathChrome.Next() {
-		if err := pathChrome.Scan(&global.PathAppChrome); err != nil {
-			global.PathAppChrome = VALUE_DEFAULT_PATH_CHROME
-		}
+		_ = pathChrome.Scan(&global.PathAppChrome)
 	}
+
+	fmt.Println("PathChrome1:", global.PathAppChrome)
 
 	home, _ := os.UserHomeDir()
 	global.PathTempProfile = home + "/TiktokReupVM/TempProfile/"

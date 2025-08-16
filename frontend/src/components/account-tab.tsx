@@ -25,6 +25,7 @@ export function ProfileTab() {
 
   const fetchProfiles = async () => {
     const result = await GetAllProfiles()
+    console.log("Fetched profiles:", result)
     if (result) {
       setProfiles(result)
     }

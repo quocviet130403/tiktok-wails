@@ -27,7 +27,7 @@ export namespace service {
 	    first_comment: string;
 	    is_authenticated: boolean;
 	    proxy_ip: string;
-	    proxy_port: number;
+	    proxy_port: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Profiles(source);

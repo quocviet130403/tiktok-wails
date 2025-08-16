@@ -7,7 +7,7 @@ type Profiles struct {
 	FirstComment    string `json:"first_comment"`
 	IsAuthenticated bool   `json:"is_authenticated"`
 	ProxyIP         string `json:"proxy_ip"`
-	ProxyPort       int    `json:"proxy_port"`
+	ProxyPort       string `json:"proxy_port"`
 }
 
 type ProfileManagerInterface interface {
