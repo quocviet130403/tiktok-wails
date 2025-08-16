@@ -31,16 +31,16 @@ func (a *App) GetAllProfiles() []service.Profiles {
 	return profiles
 }
 
-func (a *App) AddProfile(name, hashtag, firstComment string) error {
-	err := service.ProfileManager().AddProfile(name, hashtag, firstComment)
+func (a *App) AddProfile(name, hashtag, firstComment string, proxyIP string, proxyPort string) error {
+	err := service.ProfileManager().AddProfile(name, hashtag, firstComment, proxyIP, proxyPort)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (a *App) UpdateProfile(id int, name, hashtag, firstComment string) error {
-	err := service.ProfileManager().UpdateProfile(id, name, hashtag, firstComment)
+func (a *App) UpdateProfile(id int, name, hashtag, firstComment string, proxyIP string, proxyPort string) error {
+	err := service.ProfileManager().UpdateProfile(id, name, hashtag, firstComment, proxyIP, proxyPort)
 	if err != nil {
 		return err
 	}
@@ -64,16 +64,16 @@ func (a *App) GetAllDouyinProfiles() ([]service.ProfileDouyin, error) {
 	return profiles, nil
 }
 
-func (a *App) AddDouyinProfile(accountID int, nickname, url, lastVideoReup string, retryCount int) error {
-	err := service.ProfileDouyinManager().AddProfile(accountID, nickname, url, lastVideoReup, retryCount)
+func (a *App) AddDouyinProfile(nickname, url, lastVideoReup string) error {
+	err := service.ProfileDouyinManager().AddProfile(nickname, url, lastVideoReup)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (a *App) UpdateDouyinProfile(id, accountID, retryCount int, nickname, url, lastVideoReup string) error {
-	err := service.ProfileDouyinManager().UpdateProfile(id, accountID, retryCount, nickname, url, lastVideoReup)
+func (a *App) UpdateDouyinProfile(id int, nickname, url, lastVideoReup string) error {
+	err := service.ProfileDouyinManager().UpdateProfile(id, nickname, url, lastVideoReup)
 	if err != nil {
 		return err
 	}

@@ -12,6 +12,13 @@ func InitDatabase() (*sql.DB, error) {
 		return nil, err
 	}
 
+	// createProxyTableSQL := `
+	// CREATE TABLE IF NOT EXISTS proxies (
+	// 	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	// 	ip TEXT NOT NULL,
+	// 	port INTEGER NOT NULL
+	// );`
+
 	// Tạo bảng nếu chưa tồn tại
 	createProfileTableSQL := `
     CREATE TABLE IF NOT EXISTS profiles (
@@ -19,7 +26,9 @@ func InitDatabase() (*sql.DB, error) {
         name TEXT NOT NULL,
         hashtag TEXT NOT NULL,
         first_comment TEXT NOT NULL,
-		is_authenticated BOOLEAN DEFAULT FALSE
+		is_authenticated BOOLEAN DEFAULT FALSE,
+		proxy_ip TEXT DEFAULT NULL,
+		proxy_port INTEGER DEFAULT NULL
     );`
 
 	_, err = db.Exec(createProfileTableSQL)
@@ -30,7 +39,6 @@ func InitDatabase() (*sql.DB, error) {
 	createProfileDouyinTableSQL := `
 	CREATE TABLE IF NOT EXISTS profile_douyin (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		account_id INTEGER,
 		nickname TEXT NOT NULL,
 		url TEXT NOT NULL,
 		last_video_reup TEXT,
@@ -39,6 +47,19 @@ func InitDatabase() (*sql.DB, error) {
 	);`
 
 	_, err = db.Exec(createProfileDouyinTableSQL)
+	if err != nil {
+		return nil, err
+	}
+
+	createProfilesProfileDouyin := `
+	CREATE TABLE IF NOT EXISTS profiles_profile_douyin (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		profile_id INTEGER NOT NULL,
+		profile_douyin_id INTEGER NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);`
+
+	_, err = db.Exec(createProfilesProfileDouyin)
 	if err != nil {
 		return nil, err
 	}

@@ -14,9 +14,9 @@ func NewProfileManager(db *sql.DB) *ProfileManager {
 	return &ProfileManager{db: db}
 }
 
-func (am *ProfileManager) UpdateProfile(id int, name, hashtag, firstComment string) error {
-	updateSQL := `UPDATE profiles SET name=?, hashtag=?, first_comment=? WHERE id=?`
-	_, err := am.db.Exec(updateSQL, name, hashtag, firstComment, id)
+func (am *ProfileManager) UpdateProfile(id int, name, hashtag, firstComment, proxy_ip, proxy_port string) error {
+	updateSQL := `UPDATE profiles SET name=?, hashtag=?, first_comment=? WHERE id=? AND proxy_ip=? AND proxy_port=?`
+	_, err := am.db.Exec(updateSQL, name, hashtag, firstComment, id, proxy_ip, proxy_port)
 	return err
 }
 
@@ -27,7 +27,7 @@ func (am *ProfileManager) DeleteProfile(id int) error {
 	return err
 }
 
-func (am *ProfileManager) AddProfile(name, hashtag, firstComment string) error {
+func (am *ProfileManager) AddProfile(name, hashtag, firstComment, proxy_ip, proxy_port string) error {
 	// Bắt đầu transaction
 	tx, err := am.db.Begin()
 	if err != nil {
@@ -53,8 +53,8 @@ func (am *ProfileManager) AddProfile(name, hashtag, firstComment string) error {
 	}
 
 	// Thực hiện insert trong transaction
-	insertSQL := `INSERT INTO profiles (name, hashtag, first_comment, is_authenticated) VALUES (?, ?, ?, ?)`
-	_, err = tx.Exec(insertSQL, name, hashtag, firstComment, isAuthenticated)
+	insertSQL := `INSERT INTO profiles (name, hashtag, first_comment, is_authenticated, proxy_ip, proxy_port) VALUES (?, ?, ?, ?, ?, ?)`
+	_, err = tx.Exec(insertSQL, name, hashtag, firstComment, isAuthenticated, proxy_ip, proxy_port)
 	if err != nil {
 		return fmt.Errorf("lỗi khi thêm tài khoản: %w", err)
 	}
@@ -69,7 +69,7 @@ func (am *ProfileManager) AddProfile(name, hashtag, firstComment string) error {
 }
 
 func (am *ProfileManager) GetAllProfiles() ([]service.Profiles, error) {
-	rows, err := am.db.Query("SELECT id, name, hashtag, first_comment, is_authenticated FROM profiles")
+	rows, err := am.db.Query("SELECT id, name, hashtag, first_comment, is_authenticated, proxy_ip, proxy_port FROM profiles")
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func (am *ProfileManager) GetAllProfiles() ([]service.Profiles, error) {
 
 	for rows.Next() {
 		var account service.Profiles
-		err := rows.Scan(&account.ID, &account.Name, &account.Hashtag, &account.FirstComment, &account.IsAuthenticated)
+		err := rows.Scan(&account.ID, &account.Name, &account.Hashtag, &account.FirstComment, &account.IsAuthenticated, &account.ProxyIP, &account.ProxyPort)
 		if err != nil {
 			return nil, err
 		}

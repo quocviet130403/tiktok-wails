@@ -22,9 +22,9 @@ func NewProfileDouyinManager(db *sql.DB) *ProfileDouyinManager {
 	return &ProfileDouyinManager{db: db}
 }
 
-func (pm *ProfileDouyinManager) UpdateProfile(id, account_id, retry_count int, nickname, url, last_video_reup string) error {
-	updateSQL := `UPDATE profile_douyin SET nickname = ?, url = ?, last_video_reup = ? WHERE id = ? AND account_id = ? AND retry_count = ?`
-	_, err := pm.db.Exec(updateSQL, nickname, url, last_video_reup, id, account_id, retry_count)
+func (pm *ProfileDouyinManager) UpdateProfile(id int, nickname, url string) error {
+	updateSQL := `UPDATE profile_douyin SET nickname = ?, url = ? WHERE id = ?`
+	_, err := pm.db.Exec(updateSQL, nickname, url, id)
 	return err
 }
 
@@ -34,7 +34,7 @@ func (pm *ProfileDouyinManager) DeleteProfile(id int) error {
 	return err
 }
 
-func (pm *ProfileDouyinManager) AddProfile(account_id int, nickname, url, last_video_reup string, retry_count int) error {
+func (pm *ProfileDouyinManager) AddProfile(nickname, url string) error {
 	tx, err := pm.db.Begin()
 	if err != nil {
 		return fmt.Errorf("lỗi khi bắt đầu transaction: %w", err)
@@ -61,8 +61,8 @@ func (pm *ProfileDouyinManager) AddProfile(account_id int, nickname, url, last_v
 	}
 
 	// Thực hiện insert trong transaction
-	insertSQL := `INSERT INTO profile_douyin (account_id, nickname, url, last_video_reup, retry_count) VALUES (?, ?, ?, ?, ?)`
-	_, err = tx.Exec(insertSQL, account_id, nickname, url, last_video_reup, retry_count)
+	insertSQL := `INSERT INTO profile_douyin (nickname, url) VALUES (?, ?)`
+	_, err = tx.Exec(insertSQL, nickname, url)
 	if err != nil {
 		return fmt.Errorf("lỗi khi thêm tài khoản: %w", err)
 	}

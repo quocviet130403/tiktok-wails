@@ -8,21 +8,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label"
 import { Edit, Trash2, Plus } from "lucide-react"
 // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { GetAllProfiles, AddProfile, UpdateProfile, DeleteProfile } from "../../wailsjs/go/backend/App"
+import { GetAllDouyinProfiles, AddDouyinProfile, UpdateDouyinProfile, DeleteDouyinProfile } from "../../wailsjs/go/backend/App"
 
-interface Profile {
+interface ProfileDouyin {
   id: number
-  name: string
-  hashtag: string
-  first_comment: string
+  nickname: string
+  url: string
 }
 
-export function ProfileTab() {
+export function ProfileDouyinTab() {
 
   const [profiles, setProfiles] = useState<any[]>([])
 
   const fetchProfiles = async () => {
-    const result = await GetAllProfiles()
+    const result = await GetAllDouyinProfiles()
     if (result) {
       setProfiles(result)
     }
@@ -34,30 +33,27 @@ export function ProfileTab() {
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [currentProfile, setCurrentProfile] = useState<Profile | null>(null)
+  const [currentProfile, setCurrentProfile] = useState<ProfileDouyin | null>(null)
   const [editPost, setEditPost] = useState({
-    name: "",
-    hashtag: "",
-    firstComment: "",
+    nickname: "",
+    url: "",
   })
   const [createPost, setCreatePost] = useState({
-    name: "",
-    hashtag: "",
-    firstComment: "",
+    nickname: "",
+    url: "",
   })
 
-  const handleEdit = (profile: Profile) => {
+  const handleEdit = (profile: ProfileDouyin) => {
     setCurrentProfile(profile)
     setEditPost({
-      name: profile.name,
-      hashtag: profile.hashtag,
-      firstComment: profile.first_comment,
+      nickname: profile.nickname,
+      url: profile.url,
     })
     setIsEditDialogOpen(true)
   }
 
   const handleDelete = (id: number) => {
-    DeleteProfile(id)
+    DeleteDouyinProfile(id)
       .then(() => {
         fetchProfiles()
       })
@@ -69,15 +65,14 @@ export function ProfileTab() {
   const handleSaveEdit = () => {
     if (currentProfile) {
 
-      UpdateProfile(currentProfile.id, editPost.name, editPost.hashtag, editPost.firstComment)
+      UpdateDouyinProfile(currentProfile.id, editPost.nickname, editPost.url)
         .then(() => {
           fetchProfiles()
           setIsEditDialogOpen(false)
           setCurrentProfile(null)
           setEditPost({
-            name: "",
-            hashtag: "",
-            firstComment: "",
+            nickname: "",
+            url: "",
           })
         })
         .catch((error: any) => {
@@ -89,15 +84,14 @@ export function ProfileTab() {
   const handleSaveCreate = () => {
     console.log("Creating new profile with data:", createPost)
 
-    AddProfile(createPost.name, createPost.hashtag, createPost.firstComment)
+    AddDouyinProfile(createPost.nickname, createPost.url)
     .then(() => {
       console.log("Profile created successfully")
       fetchProfiles()
       
       setCreatePost({
-        name: "",
-        hashtag: "",
-        firstComment: "",
+        nickname: "",
+        url: "",
       })
       
       setIsCreateDialogOpen(false)
@@ -251,31 +245,20 @@ export function ProfileTab() {
                 Tên
               </Label>
               <Input
-                id="name"
-                value={editPost?.name}
-                onChange={(e) => setEditPost({ ...editPost, name: e.target.value })}
+                id="nickname"
+                value={editPost?.nickname}
+                onChange={(e) => setEditPost({ ...editPost, nickname: e.target.value })}
                 className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="hashtag" className="text-right text-gray-700 dark:text-gray-300">
-                Hashtag
+              <Label htmlFor="url" className="text-right text-gray-700 dark:text-gray-300">
+                URL
               </Label>
               <Input
-                id="hashtag"
-                value={editPost?.hashtag}
-                onChange={(e) => setEditPost({ ...editPost, hashtag: e.target.value })}
-                className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="first_comment" className="text-right text-gray-700 dark:text-gray-300">
-                First Comment
-              </Label>
-              <Input
-                id="first_comment"
-                value={editPost?.firstComment}
-                onChange={(e) => setEditPost({ ...editPost, firstComment: e.target.value })}
+                id="url"
+                value={editPost?.url}
+                onChange={(e) => setEditPost({ ...editPost, url: e.target.value })}
                 className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
               />
             </div>
@@ -302,31 +285,20 @@ export function ProfileTab() {
                 Tên
               </Label>
               <Input
-                id="name"
-                value={createPost.name}
-                onChange={(e) => setCreatePost({ ...createPost, name: e.target.value })}
+                id="nickname"
+                value={createPost.nickname}
+                onChange={(e) => setCreatePost({ ...createPost, nickname: e.target.value })}
                 className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="hashtag" className="text-right text-gray-700 dark:text-gray-300">
-                Hashtag
+              <Label htmlFor="url" className="text-right text-gray-700 dark:text-gray-300">
+                URL
               </Label>
               <Input
-                id="hashtag"
-                value={createPost.hashtag}
-                onChange={(e) => setCreatePost({ ...createPost, hashtag: e.target.value })}
-                className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="first_comment" className="text-right text-gray-700 dark:text-gray-300">
-                First Comment
-              </Label>
-              <Input
-                id="first_comment"
-                value={createPost.firstComment}
-                onChange={(e) => setCreatePost({ ...createPost, firstComment: e.target.value })}
+                id="url"
+                value={createPost.url}
+                onChange={(e) => setCreatePost({ ...createPost, url: e.target.value })}
                 className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
               />
             </div>

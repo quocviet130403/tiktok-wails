@@ -15,6 +15,8 @@ interface Profile {
   name: string
   hashtag: string
   first_comment: string
+  proxy_ip: string
+  proxy_port: string
 }
 
 export function ProfileTab() {
@@ -39,11 +41,15 @@ export function ProfileTab() {
     name: "",
     hashtag: "",
     firstComment: "",
+    proxyIp: "",
+    proxyPort: "",
   })
   const [createPost, setCreatePost] = useState({
     name: "",
     hashtag: "",
     firstComment: "",
+    proxyIp: "",
+    proxyPort: "",
   })
 
   const handleEdit = (profile: Profile) => {
@@ -52,6 +58,8 @@ export function ProfileTab() {
       name: profile.name,
       hashtag: profile.hashtag,
       firstComment: profile.first_comment,
+      proxyIp: profile.proxy_ip,
+      proxyPort: profile.proxy_port,
     })
     setIsEditDialogOpen(true)
   }
@@ -78,6 +86,8 @@ export function ProfileTab() {
             name: "",
             hashtag: "",
             firstComment: "",
+            proxyIp: "",
+            proxyPort: "",
           })
         })
         .catch((error: any) => {
@@ -98,6 +108,8 @@ export function ProfileTab() {
         name: "",
         hashtag: "",
         firstComment: "",
+        proxyIp: "",
+        proxyPort: "",
       })
       
       setIsCreateDialogOpen(false)
@@ -279,6 +291,28 @@ export function ProfileTab() {
                 className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
               />
             </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="proxy_ip" className="text-right text-gray-700 dark:text-gray-300">
+                Proxy IP
+              </Label>
+              <Input
+                id="proxy_ip"
+                value={editPost?.proxyIp}
+                onChange={(e) => setEditPost({ ...editPost, proxyIp: e.target.value })}
+                className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="proxy_port" className="text-right text-gray-700 dark:text-gray-300">
+                Proxy Port
+              </Label>
+              <Input
+                id="proxy_port"
+                value={editPost?.proxyPort}
+                onChange={(e) => setEditPost({ ...editPost, proxyPort: e.target.value })}
+                className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
+              />
+            </div>
           </div>
           <DialogFooter>
             <Button
@@ -327,6 +361,28 @@ export function ProfileTab() {
                 id="first_comment"
                 value={createPost.firstComment}
                 onChange={(e) => setCreatePost({ ...createPost, firstComment: e.target.value })}
+                className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="proxy_ip" className="text-right text-gray-700 dark:text-gray-300">
+                Proxy IP
+              </Label>
+              <Input
+                id="proxy_ip"
+                value={createPost.proxyIp}
+                onChange={(e) => setCreatePost({ ...createPost, proxyIp: e.target.value })}
+                className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="proxy_port" className="text-right text-gray-700 dark:text-gray-300">
+                Proxy Port
+              </Label>
+              <Input
+                id="proxy_port"
+                value={createPost.proxyPort}
+                onChange={(e) => setCreatePost({ ...createPost, proxyPort: e.target.value })}
                 className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
               />
             </div>
