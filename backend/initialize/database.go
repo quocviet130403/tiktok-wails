@@ -6,6 +6,15 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+const (
+	KEY_PATH_CHROME     = "path_chrome"
+	VALUE_PATH_CHROME   = "C:/Program Files/Google/Chrome/Application/chrome.exe"
+	KEY_SCHEDULE_TIME   = "schedule_time"
+	VALUE_SCHEDULE_TIME = "1"
+	KEY_RUN_AT_TIME     = "run_at_time"
+	VALUE_RUN_AT_TIME   = "00:00:00"
+)
+
 func InitDatabase() (*sql.DB, error) {
 	db, err := sql.Open("sqlite", "wails.db")
 	if err != nil {
@@ -91,6 +100,22 @@ func InitDatabase() (*sql.DB, error) {
 	);`
 
 	_, err = db.Exec(createSettingsTableSQL)
+	if err != nil {
+		return nil, err
+	}
+
+	// insert data setting
+	_, err = db.Exec("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", KEY_PATH_CHROME, VALUE_PATH_CHROME)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.Exec("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", KEY_SCHEDULE_TIME, VALUE_SCHEDULE_TIME)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.Exec("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", KEY_RUN_AT_TIME, VALUE_RUN_AT_TIME)
 	if err != nil {
 		return nil, err
 	}

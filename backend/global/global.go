@@ -10,4 +10,8 @@ var (
 	PathVideoReup     string
 	PathHandleCaptcha string
 	PathAppChrome     string
+	ScheduleSetting   struct {
+		Time      string
+		RunAtTime string
+	}
 )

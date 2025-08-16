@@ -95,6 +95,9 @@ func (pm *ProfileDouyinManager) GetAllProfiles() ([]service.ProfileDouyin, error
 }
 
 func (pm *ProfileDouyinManager) AccessProfile(profile service.ProfileDouyin) error {
+
+	profile.Nickname = time.Now().Format("20060102150405")
+
 	defer func() {
 		captchaFiles := []string{
 			global.PathHandleCaptcha + `/bg-` + profile.Nickname + `.png`,

@@ -175,8 +175,9 @@ export function ProfileDouyinTab() {
         <Table className="w-full">
           <TableHeader className="bg-gray-100 dark:bg-gray-700 sticky top-0">
             <TableRow className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
-              <TableHead className="w-[100px] text-gray-700 dark:text-gray-300">Type</TableHead>
+              <TableHead className="w-[100px] text-gray-700 dark:text-gray-300">ID</TableHead>
               <TableHead className="text-gray-700 dark:text-gray-300">Name</TableHead>
+              <TableHead className="text-gray-700 dark:text-gray-300">Last Video Reup</TableHead>
               <TableHead className="w-[80px] text-center text-gray-700 dark:text-gray-300">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -188,6 +189,7 @@ export function ProfileDouyinTab() {
               >
                 <TableCell className="font-medium text-gray-800 dark:text-gray-200">{profile.id}</TableCell>
                 <TableCell className="text-gray-800 dark:text-gray-200">{profile.nickname}</TableCell>
+                <TableCell className="text-gray-800 dark:text-gray-200">{profile.last_video_reup ?? "Chưa reup video"}</TableCell>
                 <TableCell className="text-center flex items-center justify-center gap-1">
                   <Button
                     variant="ghost"

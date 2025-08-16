@@ -2,31 +2,34 @@ package initialize
 
 import (
 	"database/sql"
-	"fmt"
 	"os"
 	"tiktok-wails/backend/global"
-)
-
-const (
-	KEY_PATH_CHROME           = "path_chrome"
-	VALUE_DEFAULT_PATH_CHROME = "C:/Program Files/Google/Chrome/Application/chrome.exe"
 )
 
 func InitGlobal(db *sql.DB) error {
 	global.DB = db
 
-	pathChrome, err := db.Query("SELECT value FROM settings WHERE key = ?", KEY_PATH_CHROME)
+	settings, err := db.Query("SELECT key, value FROM settings")
 	if err != nil {
 		return err
 	}
-	defer pathChrome.Close()
+	defer settings.Close()
 
-	global.PathAppChrome = VALUE_DEFAULT_PATH_CHROME
-	if pathChrome.Next() {
-		_ = pathChrome.Scan(&global.PathAppChrome)
+	for settings.Next() {
+		var key, value string
+		if err := settings.Scan(&key, &value); err != nil {
+			return err
+		}
+
+		switch key {
+		case KEY_PATH_CHROME:
+			global.PathAppChrome = value
+		case KEY_SCHEDULE_TIME:
+			global.ScheduleSetting.Time = value
+		case KEY_RUN_AT_TIME:
+			global.ScheduleSetting.RunAtTime = value
+		}
 	}
-
-	fmt.Println("PathChrome1:", global.PathAppChrome)
 
 	home, _ := os.UserHomeDir()
 	global.PathTempProfile = home + "/TiktokReupVM/TempProfile/"

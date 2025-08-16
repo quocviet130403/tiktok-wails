@@ -194,8 +194,10 @@ export function ProfileTab() {
         <Table className="w-full">
           <TableHeader className="bg-gray-100 dark:bg-gray-700 sticky top-0">
             <TableRow className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
-              <TableHead className="w-[100px] text-gray-700 dark:text-gray-300">Type</TableHead>
-              <TableHead className="text-gray-700 dark:text-gray-300">Name</TableHead>
+              <TableHead className="w-[100px] text-gray-700 dark:text-gray-300">ID</TableHead>
+              <TableHead className="text-gray-700 dark:text-gray-300">Tên</TableHead>
+              <TableHead className="text-gray-700 dark:text-gray-300">Xác thực</TableHead>
+              <TableHead className="text-gray-700 dark:text-gray-300">Proxy</TableHead>
               <TableHead className="w-[80px] text-center text-gray-700 dark:text-gray-300">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -207,6 +209,8 @@ export function ProfileTab() {
               >
                 <TableCell className="font-medium text-gray-800 dark:text-gray-200">{profile.id}</TableCell>
                 <TableCell className="text-gray-800 dark:text-gray-200">{profile.name}</TableCell>
+                <TableCell className="text-gray-800 dark:text-gray-200">{profile.is_authenticated ? "Đã xác thực" : "Chưa xác thực"}</TableCell>
+                <TableCell className="text-gray-800 dark:text-gray-200">{profile.proxy_ip ? profile.proxy_ip+":"+profile.proxy_port : "Không có"}</TableCell>
                 <TableCell className="text-center flex items-center justify-center gap-1">
                   <Button
                     variant="ghost"
