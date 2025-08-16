@@ -77,7 +77,7 @@ export function ProfileTab() {
   const handleSaveEdit = () => {
     if (currentProfile) {
 
-      UpdateProfile(currentProfile.id, editPost.name, editPost.hashtag, editPost.firstComment)
+      UpdateProfile(currentProfile.id, editPost.name, editPost.hashtag, editPost.firstComment, editPost.proxyIp, editPost.proxyPort)
         .then(() => {
           fetchProfiles()
           setIsEditDialogOpen(false)
@@ -99,7 +99,7 @@ export function ProfileTab() {
   const handleSaveCreate = () => {
     console.log("Creating new profile with data:", createPost)
 
-    AddProfile(createPost.name, createPost.hashtag, createPost.firstComment)
+    AddProfile(createPost.name, createPost.hashtag, createPost.firstComment, createPost.proxyIp, createPost.proxyPort)
     .then(() => {
       console.log("Profile created successfully")
       fetchProfiles()

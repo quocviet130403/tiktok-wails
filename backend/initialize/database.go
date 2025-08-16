@@ -23,7 +23,7 @@ func InitDatabase() (*sql.DB, error) {
 	createProfileTableSQL := `
     CREATE TABLE IF NOT EXISTS profiles (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
+        name TEXT NOT NULL UNIQUE,
         hashtag TEXT NOT NULL,
         first_comment TEXT NOT NULL,
 		is_authenticated BOOLEAN DEFAULT FALSE,
@@ -39,8 +39,8 @@ func InitDatabase() (*sql.DB, error) {
 	createProfileDouyinTableSQL := `
 	CREATE TABLE IF NOT EXISTS profile_douyin (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		nickname TEXT NOT NULL,
-		url TEXT NOT NULL,
+		nickname TEXT NOT NULL UNIQUE,
+		url TEXT NOT NULL UNIQUE,
 		last_video_reup TEXT,
 		retry_count INTEGER DEFAULT 0,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -78,6 +78,19 @@ func InitDatabase() (*sql.DB, error) {
 		like_count INTEGER DEFAULT 0
 	);`
 	_, err = db.Exec(createVideosTableSQL)
+	if err != nil {
+		return nil, err
+	}
+
+	// tao them table settings
+	createSettingsTableSQL := `
+	CREATE TABLE IF NOT EXISTS settings (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		key TEXT NOT NULL UNIQUE,
+		value TEXT NOT NULL
+	);`
+
+	_, err = db.Exec(createSettingsTableSQL)
 	if err != nil {
 		return nil, err
 	}

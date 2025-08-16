@@ -26,6 +26,8 @@ export namespace service {
 	    hashtag: string;
 	    first_comment: string;
 	    is_authenticated: boolean;
+	    proxy_ip: string;
+	    proxy_port: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Profiles(source);
@@ -38,6 +40,8 @@ export namespace service {
 	        this.hashtag = source["hashtag"];
 	        this.first_comment = source["first_comment"];
 	        this.is_authenticated = source["is_authenticated"];
+	        this.proxy_ip = source["proxy_ip"];
+	        this.proxy_port = source["proxy_port"];
 	    }
 	}
 	export class Video {

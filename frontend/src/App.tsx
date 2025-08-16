@@ -7,6 +7,7 @@ import { MainHeader } from "@/components/main-header"
 import { VideoTab } from "@/components/video-tab"
 import { SettingsTab } from "@/components/settings-tab"
 import { ProfileTab } from "@/components/account-tab"
+import { ProfileDouyinTab } from "./components/profile-douyin-tab"
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("account")
@@ -24,7 +25,13 @@ export default function App() {
                 value="account"
                 className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-gray-50 transition-colors duration-200"
               >
-                Quản lý Account
+                Quản lý Profile chrome
+              </TabsTrigger>
+              <TabsTrigger
+                value="douyin"
+                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-gray-50 transition-colors duration-200"
+              >
+                Quản lý Profile Douyin
               </TabsTrigger>
               <TabsTrigger
                 value="video"
@@ -46,6 +53,12 @@ export default function App() {
               <ProfileTab />
             </TabsContent>
             <TabsContent
+              value="douyin"
+              className="flex-1 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-auto"
+            >
+              <ProfileDouyinTab />
+            </TabsContent>
+            <TabsContent
               value="video"
               className="flex-1 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-auto"
             >
@@ -60,9 +73,9 @@ export default function App() {
           </Tabs>
         </div>
         <div className="flex items-center justify-between p-2 bg-gray-200 dark:bg-gray-800 border-t border-gray-300 dark:border-gray-700 text-sm">
-          <div className="flex items-center gap-2">
+          {/* <div className="flex items-center gap-2">
             <span className="font-medium">Đỗ Hữu Ben (Vĩnh viễn)</span>
-          </div>
+          </div> */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
               <input

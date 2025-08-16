@@ -64,16 +64,16 @@ func (a *App) GetAllDouyinProfiles() ([]service.ProfileDouyin, error) {
 	return profiles, nil
 }
 
-func (a *App) AddDouyinProfile(nickname, url, lastVideoReup string) error {
-	err := service.ProfileDouyinManager().AddProfile(nickname, url, lastVideoReup)
+func (a *App) AddDouyinProfile(nickname, url string) error {
+	err := service.ProfileDouyinManager().AddProfile(nickname, url)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (a *App) UpdateDouyinProfile(id int, nickname, url, lastVideoReup string) error {
-	err := service.ProfileDouyinManager().UpdateProfile(id, nickname, url, lastVideoReup)
+func (a *App) UpdateDouyinProfile(id int, nickname, url string) error {
+	err := service.ProfileDouyinManager().UpdateProfile(id, nickname, url)
 	if err != nil {
 		return err
 	}
@@ -99,6 +99,39 @@ func (a *App) GetAllVideos(page int, pageSize int) ([]service.Video, error) {
 
 func (a *App) AddVideo(title string, videoURL string, thumbnailURL string, duration int, likeCount int, profileDouyinID int) error {
 	err := service.VideoManager().AddVideo(title, videoURL, thumbnailURL, duration, likeCount, profileDouyinID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Settings
+func (a *App) GetAllSettings() (map[string]string, error) {
+	settings, err := service.SettingManager().GetAllSettings()
+	if err != nil {
+		return nil, err
+	}
+	return settings, nil
+}
+
+func (a *App) GetSetting(key string) (string, error) {
+	value, err := service.SettingManager().GetSetting(key)
+	if err != nil {
+		return "", err
+	}
+	return value, nil
+}
+
+func (a *App) SetSetting(key, value string) error {
+	err := service.SettingManager().SetSetting(key, value)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *App) SeederSetting() error {
+	err := service.SettingManager().SetSetting("path_chrome", "C:/Program Files/Google/Chrome/Application/chrome.exe")
 	if err != nil {
 		return err
 	}
