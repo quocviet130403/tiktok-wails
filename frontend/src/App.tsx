@@ -20,7 +20,7 @@ export default function App() {
         <MainHeader toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
         <div className="flex-1 p-4 overflow-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-3 bg-gray-200 dark:bg-gray-800 rounded-lg p-1 mb-4">
+            <TabsList className="grid w-full grid-cols-4 bg-gray-200 dark:bg-gray-800 rounded-lg p-1 mb-4">
               <TabsTrigger
                 value="account"
                 className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-gray-50 transition-colors duration-200"

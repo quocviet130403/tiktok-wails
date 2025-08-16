@@ -30,8 +30,24 @@ export function GetAllProfiles() {
   return window['go']['backend']['App']['GetAllProfiles']();
 }
 
+export function GetAllSettings() {
+  return window['go']['backend']['App']['GetAllSettings']();
+}
+
 export function GetAllVideos(arg1, arg2) {
   return window['go']['backend']['App']['GetAllVideos'](arg1, arg2);
+}
+
+export function GetSetting(arg1) {
+  return window['go']['backend']['App']['GetSetting'](arg1);
+}
+
+export function SeederSetting() {
+  return window['go']['backend']['App']['SeederSetting']();
+}
+
+export function SetSetting(arg1, arg2) {
+  return window['go']['backend']['App']['SetSetting'](arg1, arg2);
 }
 
 export function UpdateDouyinProfile(arg1, arg2, arg3) {

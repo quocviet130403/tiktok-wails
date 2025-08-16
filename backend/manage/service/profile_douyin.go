@@ -4,7 +4,7 @@ type ProfileDouyin struct {
 	ID            int    `json:"id"`
 	Nickname      string `json:"nickname"`
 	URL           string `json:"url"`
-	LastVideoReup string `json:"last_video_reup"`
+	LastVideoReup any    `json:"last_video_reup"`
 	RetryCount    int    `json:"retry_count"`
 }
 

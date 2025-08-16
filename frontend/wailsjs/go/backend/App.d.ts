@@ -16,7 +16,15 @@ export function GetAllDouyinProfiles():Promise<Array<service.ProfileDouyin>>;
 
 export function GetAllProfiles():Promise<Array<service.Profiles>>;
 
+export function GetAllSettings():Promise<Record<string, string>>;
+
 export function GetAllVideos(arg1:number,arg2:number):Promise<Array<service.Video>>;
+
+export function GetSetting(arg1:string):Promise<string>;
+
+export function SeederSetting():Promise<void>;
+
+export function SetSetting(arg1:string,arg2:string):Promise<void>;
 
 export function UpdateDouyinProfile(arg1:number,arg2:string,arg3:string):Promise<void>;
 

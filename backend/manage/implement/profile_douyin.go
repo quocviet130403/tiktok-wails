@@ -114,6 +114,12 @@ func (pm *ProfileDouyinManager) AccessProfile(profile service.ProfileDouyin) err
 		}
 	}()
 
+	tempDir, err := os.MkdirTemp("", "douyin-test-access-*")
+	if err != nil {
+		return fmt.Errorf("lỗi khi tạo thư mục tạm: %w", err)
+	}
+	defer os.RemoveAll(tempDir)
+
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.ExecPath("C:/Program Files/Google/Chrome/Application/chrome.exe"),
 		chromedp.Flag("headless", true),
@@ -129,7 +135,7 @@ func (pm *ProfileDouyinManager) AccessProfile(profile service.ProfileDouyin) err
 		chromedp.Flag("disable-web-security", true),
 		chromedp.Flag("disable-features", "VizDisplayCompositor"),
 		chromedp.Flag("disable-ipc-flooding-protection", true),
-		chromedp.UserDataDir(`C:\Users\viet1\AppData\Local\Temp\`+profile.Nickname),
+		chromedp.UserDataDir(tempDir),
 	)
 
 	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
@@ -148,7 +154,7 @@ func (pm *ProfileDouyinManager) AccessProfile(profile service.ProfileDouyin) err
 	// Sử dụng WaitGroup để quản lý các goroutine
 	var wg sync.WaitGroup
 
-	err := chromedp.Run(ctx,
+	err = chromedp.Run(ctx,
 		chromedp.Navigate(profile.URL),
 		chromedp.Sleep(5*time.Second), // Tăng thời gian chờ cho headless mode
 	)

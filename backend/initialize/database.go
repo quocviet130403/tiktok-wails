@@ -41,7 +41,7 @@ func InitDatabase() (*sql.DB, error) {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		nickname TEXT NOT NULL UNIQUE,
 		url TEXT NOT NULL UNIQUE,
-		last_video_reup TEXT,
+		last_video_reup TEXT DEFAULT NULL,
 		retry_count INTEGER DEFAULT 0,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);`

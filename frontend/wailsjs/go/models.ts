@@ -4,7 +4,7 @@ export namespace service {
 	    id: number;
 	    nickname: string;
 	    url: string;
-	    last_video_reup: string;
+	    last_video_reup: any;
 	    retry_count: number;
 	
 	    static createFrom(source: any = {}) {

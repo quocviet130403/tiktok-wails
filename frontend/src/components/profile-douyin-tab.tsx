@@ -187,7 +187,7 @@ export function ProfileDouyinTab() {
                 className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
               >
                 <TableCell className="font-medium text-gray-800 dark:text-gray-200">{profile.id}</TableCell>
-                <TableCell className="text-gray-800 dark:text-gray-200">{profile.name}</TableCell>
+                <TableCell className="text-gray-800 dark:text-gray-200">{profile.nickname}</TableCell>
                 <TableCell className="text-center flex items-center justify-center gap-1">
                   <Button
                     variant="ghost"
