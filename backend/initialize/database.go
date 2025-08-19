@@ -93,6 +93,20 @@ func InitDatabase() (*sql.DB, error) {
 		return nil, err
 	}
 
+	// table video profile
+	createVideosProfilesTableSQL := `
+	CREATE TABLE IF NOT EXISTS videos_profiles (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		video_id INTEGER NOT NULL,
+		profile_id INTEGER NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);`
+
+	_, err = db.Exec(createVideosProfilesTableSQL)
+	if err != nil {
+		return nil, err
+	}
+
 	// tao them table settings
 	createSettingsTableSQL := `
 	CREATE TABLE IF NOT EXISTS settings (

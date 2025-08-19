@@ -16,7 +16,7 @@ type VideoManagerInterface interface {
 	UploadVideo(profile, video, title string) error
 	AddVideo(title, videoURL, thumbnailURL string, duration int, likeCount int, profileDouyinID int) error
 	GetAllVideos(page int, pageSize int) ([]Video, error)
-	// GetVideoReup(profile_id int) ([]Video, error)
+	GetVideoReup(profile_id int) ([]Video, error)
 }
 
 var (

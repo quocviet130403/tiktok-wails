@@ -72,9 +72,36 @@ func InitSchedule() {
 				if run {
 					go func() {
 						// logic code
+						profiles, err := service.ProfileManager().GetAllProfiles()
+						if err != nil {
+							log.Printf("Lỗi khi lấy danh sách profile: %v", err)
+							return
+						}
+
+						for _, profile := range profiles {
+							go func(profile service.Profiles) {
+								// Logic code
+								allVideos, err := service.VideoManager().GetVideoReup(profile.ID)
+								if err != nil {
+									log.Printf("Lỗi khi lấy danh sách video từ profile: %v", err)
+									return
+								}
+
+								for _, video := range allVideos {
+									err := service.VideoManager().UploadVideo(profile.Name, video.Title, video.Title+" "+profile.Hashtag)
+									if err != nil {
+										log.Printf("Lỗi khi upload video: %v", err)
+										return
+									}
+								}
+
+							}(profile)
+						}
 					}()
 				}
 			}
 		}
 	}()
+
+	// Delete uploaded videos
 }
