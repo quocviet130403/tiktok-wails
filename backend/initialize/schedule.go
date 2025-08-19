@@ -93,6 +93,12 @@ func InitSchedule() {
 										log.Printf("Lỗi khi upload video: %v", err)
 										return
 									}
+
+									err = service.VideoManager().UpdateStatusReup(video.ID, profile.ID, "done")
+									if err != nil {
+										log.Printf("Lỗi khi cập nhật trạng thái video: %v", err)
+										return
+									}
 								}
 
 							}(profile)
@@ -104,4 +110,50 @@ func InitSchedule() {
 	}()
 
 	// Delete uploaded videos
+	tickerDelete := time.NewTicker(1 * time.Second)
+	go func() {
+		for now := range tickerDelete.C {
+			run := false
+			switch global.ScheduleSetting.Time {
+			case "daily":
+				if now.Hour() == hour+4 {
+					run = true
+				}
+				if run {
+					go func() {
+						getAllVideos, err := service.VideoManager().GetAllVideosNP()
+						if err != nil {
+							log.Printf("Lỗi khi lấy danh sách video: %v", err)
+							return
+						}
+
+						for _, video := range getAllVideos {
+							sqlProfileHasNotBeenUploadedYet := `
+								SELECT count(v.id) FROM videos v
+								LEFT JOIN videos_profiles vp ON v.id = vp.video_id
+								WHERE vp.status = 'pending'
+								AND v.id = ?;
+							`
+
+							var count int
+							err := global.DB.QueryRow(sqlProfileHasNotBeenUploadedYet, video.ID).Scan(&count)
+							if err != nil {
+								log.Printf("Lỗi khi đếm video chưa được upload: %v", err)
+								return
+							}
+
+							if count == 0 {
+								// Xóa video
+								err := service.VideoManager().DeleteVideo(video)
+								if err != nil {
+									log.Printf("Lỗi khi xóa video: %v", err)
+									return
+								}
+							}
+						}
+					}()
+				}
+			}
+		}
+	}()
 }

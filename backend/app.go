@@ -97,12 +97,12 @@ func (a *App) GetAllVideos(page int, pageSize int) ([]service.Video, error) {
 	return videos, nil
 }
 
-func (a *App) AddVideo(title string, videoURL string, thumbnailURL string, duration int, likeCount int, profileDouyinID int) error {
-	err := service.VideoManager().AddVideo(title, videoURL, thumbnailURL, duration, likeCount, profileDouyinID)
+func (a *App) AddVideo(title string, videoURL string, thumbnailURL string, duration int, likeCount int, profileDouyinID int) (service.Video, error) {
+	result, err := service.VideoManager().AddVideo(title, videoURL, thumbnailURL, duration, likeCount, profileDouyinID)
 	if err != nil {
-		return err
+		return service.Video{}, err
 	}
-	return nil
+	return result, nil
 }
 
 // Settings

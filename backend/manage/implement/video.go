@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"tiktok-wails/backend/global"
 	"tiktok-wails/backend/manage/service"
 	"time"
@@ -161,8 +162,13 @@ func (vm *VideoManager) UploadVideo(profile, video, title string) error {
 			return chromedp.Evaluate(js, nil).Do(ctx)
 		}),
 
-		// Thiếu click button submit để đăng video
-		chromedp.Sleep(360*time.Second), // Đợi trang tải xong
+		chromedp.Sleep(2*time.Second),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			// Thiếu click button submit để đăng video
+			return chromedp.Click(`.button-group > button`, chromedp.ByQuery).Do(ctx)
+		}),
+
+		chromedp.Sleep(3*time.Second),
 	)
 
 	if err != nil {
@@ -174,10 +180,27 @@ func (vm *VideoManager) UploadVideo(profile, video, title string) error {
 
 }
 
-func (vm *VideoManager) AddVideo(title, videoURL, thumbnailURL string, duration int, likeCount int, profileDouyinID int) error {
+func (vm *VideoManager) AddVideo(title, videoURL, thumbnailURL string, duration int, likeCount int, profileDouyinID int) (service.Video, error) {
 	insertSQL := `INSERT INTO videos (title, video_url, thumbnail_url, duration, like_count, profile_douyin_id) VALUES (?, ?, ?, ?, ?, ?)`
-	_, err := vm.db.Exec(insertSQL, title, videoURL, thumbnailURL, duration, likeCount, profileDouyinID)
-	return err
+	result, err := vm.db.Exec(insertSQL, title, videoURL, thumbnailURL, duration, likeCount, profileDouyinID)
+	if err != nil {
+		return service.Video{}, err
+	}
+
+	videoID, err := result.LastInsertId()
+	if err != nil {
+		return service.Video{}, err
+	}
+
+	return service.Video{
+		ID:              int(videoID),
+		Title:           title,
+		VideoURL:        videoURL,
+		ThumbnailURL:    thumbnailURL,
+		Duration:        duration,
+		LikeCount:       likeCount,
+		ProfileDouyinID: profileDouyinID,
+	}, nil
 }
 
 func (vm *VideoManager) GetAllVideos(page int, pageSize int) ([]service.Video, error) {
@@ -202,6 +225,27 @@ func (vm *VideoManager) GetAllVideos(page int, pageSize int) ([]service.Video, e
 	return videos, nil
 }
 
+func (vm *VideoManager) GetAllVideosNP() ([]service.Video, error) {
+	query := `SELECT id, title, video_url, thumbnail_url, duration, like_count, profile_douyin_id, status, is_deleted_video FROM videos WHERE is_deleted_video = false AND status = 'done'`
+	rows, err := vm.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var videos []service.Video
+	for rows.Next() {
+		var video service.Video
+		if err := rows.Scan(&video.ID, &video.Title, &video.VideoURL, &video.ThumbnailURL,
+			&video.Duration, &video.LikeCount, &video.ProfileDouyinID, &video.Status, &video.IsDeleted); err != nil {
+			return nil, err
+		}
+		videos = append(videos, video)
+	}
+
+	return videos, nil
+}
+
 func (vm *VideoManager) GetVideoReup(profile_id int) ([]service.Video, error) {
 	allVideos, err := global.DB.Query(`
 		SELECT v.* FROM video AS v
@@ -211,6 +255,7 @@ func (vm *VideoManager) GetVideoReup(profile_id int) ([]service.Video, error) {
 			WHERE p.id = ?
 			AND v.status = 'done'
 		)
+		LIMIT 10
 	`, profile_id)
 	if err != nil {
 		return nil, err
@@ -228,4 +273,39 @@ func (vm *VideoManager) GetVideoReup(profile_id int) ([]service.Video, error) {
 	}
 
 	return videos, nil
+}
+
+func (vm *VideoManager) UpdateStatusReup(video_id, profile_id int, status string) error {
+	updateSQL := `UPDATE videos_profiles SET status = ? WHERE video_id = ? AND profile_id = ?`
+	_, err := vm.db.Exec(updateSQL, status, video_id, profile_id)
+	return err
+}
+
+func (vm *VideoManager) CreateConnectWithProfile(profileID int, videoID int) error {
+	createSQL := `INSERT INTO videos_profiles (video_id, profile_id) VALUES (?, ?)`
+	_, err := vm.db.Exec(createSQL, videoID, profileID)
+	return err
+}
+
+func (vm *VideoManager) DeleteVideo(video service.Video) error {
+	deleteSQL := `UPDATE videos SET is_deleted_video = true WHERE id = ?`
+	_, err := vm.db.Exec(deleteSQL, video.ID)
+
+	// xóa file video
+	videoPath := fmt.Sprintf("%s/%s.mp4", global.PathVideoReup, video.Title)
+	err = os.Remove(videoPath)
+	if err != nil {
+		log.Printf("Lỗi khi xóa file video: %v", err)
+		return err
+	}
+
+	// xóa file video sub
+	videoPathSub := fmt.Sprintf("%s/%s-sub.mp4", global.PathVideoReup, video.Title)
+	err = os.Remove(videoPathSub)
+	if err != nil {
+		log.Printf("Lỗi khi xóa file video sub: %v", err)
+		return err
+	}
+
+	return err
 }

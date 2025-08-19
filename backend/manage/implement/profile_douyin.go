@@ -403,9 +403,15 @@ func (pm *ProfileDouyinManager) GetVideoFromProfile(profile service.ProfileDouyi
 					}
 
 					for i, video := range newVideoList {
-						err := service.VideoManager().AddVideo(video.Desc, video.Video.PlayAddr.URLList[0], video.Video.Cover.URLList[0], video.Duration, video.Statistic.LikeCount, profile.ID)
+						videoAdded, err := service.VideoManager().AddVideo(video.Desc, video.Video.PlayAddr.URLList[0], video.Video.Cover.URLList[0], video.Duration, video.Statistic.LikeCount, profile.ID)
 						if err != nil {
 							log.Printf("Lỗi khi thêm video %d: %v", i+1, err)
+						}
+
+						err = service.VideoManager().CreateConnectWithProfile(profile.ID, videoAdded.ID)
+						if err != nil {
+							log.Printf("Lỗi khi tạo kết nối giữa video và profile: %v", err)
+							return
 						}
 					}
 

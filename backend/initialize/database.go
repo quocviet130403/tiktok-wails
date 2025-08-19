@@ -82,11 +82,12 @@ func InitDatabase() (*sql.DB, error) {
 		title TEXT NOT NULL,
 		video_url TEXT NOT NULL,
 		thumbnail_url TEXT,
-		profile_douyin_id INTEGER,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		duration INTEGER,
-		status TEXT DEFAULT 'pending',
 		like_count INTEGER DEFAULT 0
+		profile_douyin_id INTEGER,
+		status TEXT DEFAULT 'pending',
+		is_deleted_video BOOLEAN DEFAULT FALSE,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);`
 	_, err = db.Exec(createVideosTableSQL)
 	if err != nil {
@@ -99,6 +100,7 @@ func InitDatabase() (*sql.DB, error) {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		video_id INTEGER NOT NULL,
 		profile_id INTEGER NOT NULL,
+		status TEXT DEFAULT 'pending',
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);`
 
