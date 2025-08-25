@@ -22,6 +22,7 @@ type VideoManagerInterface interface {
 	UpdateStatusReup(video_id, profile_id int, status string) error
 	CreateConnectWithProfile(profileID int, videoID int) error
 	DeleteVideo(video Video) error
+	GetCompleteProfileVideos(video_id int) (int, error)
 }
 
 var (

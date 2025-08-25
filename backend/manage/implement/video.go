@@ -309,3 +309,26 @@ func (vm *VideoManager) DeleteVideo(video service.Video) error {
 
 	return err
 }
+
+func (vm *VideoManager) GetCompleteProfileVideos(video_id int) (int, error) {
+	query := `
+		SELECT count(v.id) FROM videos v
+		LEFT JOIN videos_profiles vp ON v.id = vp.video_id
+		WHERE vp.status = 'pending'
+		AND v.id = ?;
+	`
+	rows, err := vm.db.Query(query, video_id)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+
+	var count int
+	if rows.Next() {
+		if err := rows.Scan(&count); err != nil {
+			return 0, err
+		}
+	}
+
+	return count, nil
+}

@@ -128,17 +128,9 @@ func InitSchedule() {
 						}
 
 						for _, video := range getAllVideos {
-							sqlProfileHasNotBeenUploadedYet := `
-								SELECT count(v.id) FROM videos v
-								LEFT JOIN videos_profiles vp ON v.id = vp.video_id
-								WHERE vp.status = 'pending'
-								AND v.id = ?;
-							`
-
-							var count int
-							err := global.DB.QueryRow(sqlProfileHasNotBeenUploadedYet, video.ID).Scan(&count)
+							count, err := service.VideoManager().GetCompleteProfileVideos(video.ID)
 							if err != nil {
-								log.Printf("Lỗi khi đếm video chưa được upload: %v", err)
+								log.Printf("Lỗi khi đếm video đã được upload: %v", err)
 								return
 							}
 
