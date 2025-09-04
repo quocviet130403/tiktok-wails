@@ -137,3 +137,20 @@ func (a *App) SeederSetting() error {
 	}
 	return nil
 }
+
+// Connect profile with douyin profiles
+func (a *App) ConnectWithProfileDouyin(profileId int, listProfileDouyinId []int) error {
+	err := service.ProfileManager().ConnectWithProfileDouyin(profileId, listProfileDouyinId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *App) GetAllDouyinProfilesFromProfile(profileId int) ([]service.ProfileDouyin, error) {
+	profiles, err := service.ProfileDouyinManager().GetAllProfileDouyinFromProfile(profileId)
+	if err != nil {
+		return nil, err
+	}
+	return profiles, nil
+}

@@ -509,3 +509,26 @@ func (pm *ProfileDouyinManager) GetVideoFromProfile(profile service.ProfileDouyi
 	log.Println("Kết thúc quá trình crawl video từ Douyin")
 	return nil
 }
+
+func (pm *ProfileDouyinManager) GetAllProfileDouyinFromProfile(profileId int) ([]service.ProfileDouyin, error) {
+	query := `
+	SELECT pd.id, pd.nickname, pd.url
+	FROM profile_douyin pd
+	JOIN profiles_profile_douyin ppd ON pd.id = ppd.profile_douyin_id
+	WHERE ppd.profile_id = ?`
+	rows, err := pm.db.Query(query, profileId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var profiles []service.ProfileDouyin
+	for rows.Next() {
+		var profile service.ProfileDouyin
+		if err := rows.Scan(&profile.ID, &profile.Nickname, &profile.URL); err != nil {
+			return nil, err
+		}
+		profiles = append(profiles, profile)
+	}
+	return profiles, nil
+}

@@ -94,3 +94,15 @@ func (am *ProfileManager) GetAllProfiles() ([]service.Profiles, error) {
 
 	return profiles, nil
 }
+
+func (am *ProfileManager) ConnectWithProfileDouyin(profileId int, listProfileDouyinId []int) error {
+	for _, profileDouyin := range listProfileDouyinId {
+		// Connect the profile with the Douyin profile
+		insertSQL := `INSERT INTO profiles_profile_douyin (profile_id, profile_douyin_id) VALUES (?, ?)`
+		_, err := am.db.Exec(insertSQL, profileId, profileDouyin)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}

@@ -16,6 +16,7 @@ type ProfileDouyinInterface interface {
 	AccessProfile(profile ProfileDouyin) error
 	GetVideoFromProfile(profile ProfileDouyin) error
 	UpdateLastVideoReup(id int, lastVideoReup any) error
+	GetAllProfileDouyinFromProfile(profileId int) ([]ProfileDouyin, error)
 }
 
 var (

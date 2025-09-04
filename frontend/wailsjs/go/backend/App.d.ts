@@ -6,13 +6,17 @@ export function AddDouyinProfile(arg1:string,arg2:string):Promise<void>;
 
 export function AddProfile(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string):Promise<void>;
 
-export function AddVideo(arg1:string,arg2:string,arg3:string,arg4:number,arg5:number,arg6:number):Promise<void>;
+export function AddVideo(arg1:string,arg2:string,arg3:string,arg4:number,arg5:number,arg6:number):Promise<service.Video>;
+
+export function ConnectWithProfileDouyin(arg1:number,arg2:Array<number>):Promise<void>;
 
 export function DeleteDouyinProfile(arg1:number):Promise<void>;
 
 export function DeleteProfile(arg1:number):Promise<void>;
 
 export function GetAllDouyinProfiles():Promise<Array<service.ProfileDouyin>>;
+
+export function GetAllDouyinProfilesFromProfile(arg1:number):Promise<Array<service.ProfileDouyin>>;
 
 export function GetAllProfiles():Promise<Array<service.Profiles>>;
 

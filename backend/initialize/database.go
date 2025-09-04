@@ -83,7 +83,7 @@ func InitDatabase() (*sql.DB, error) {
 		video_url TEXT NOT NULL,
 		thumbnail_url TEXT,
 		duration INTEGER,
-		like_count INTEGER DEFAULT 0
+		like_count INTEGER DEFAULT 0,
 		profile_douyin_id INTEGER,
 		status TEXT DEFAULT 'pending',
 		is_deleted_video BOOLEAN DEFAULT FALSE,

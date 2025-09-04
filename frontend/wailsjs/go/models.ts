@@ -53,6 +53,7 @@ export namespace service {
 	    LikeCount: number;
 	    ProfileDouyinID: number;
 	    Status: string;
+	    IsDeleted: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Video(source);
@@ -68,6 +69,7 @@ export namespace service {
 	        this.LikeCount = source["LikeCount"];
 	        this.ProfileDouyinID = source["ProfileDouyinID"];
 	        this.Status = source["Status"];
+	        this.IsDeleted = source["IsDeleted"];
 	    }
 	}
 

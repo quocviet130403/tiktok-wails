@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Edit, Trash2, Plus, Link, Delete, DeleteIcon, Trash } from "lucide-react"
+import { Edit, Trash2, Plus, Link } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { GetAllProfiles, AddProfile, UpdateProfile, DeleteProfile, GetAllDouyinProfiles } from "../../wailsjs/go/backend/App"
+import { GetAllProfiles, AddProfile, UpdateProfile, DeleteProfile, GetAllDouyinProfiles, GetAllDouyinProfilesFromProfile } from "../../wailsjs/go/backend/App"
 
 interface Profile {
   id: number
@@ -19,24 +19,16 @@ interface Profile {
   proxy_port: string
 }
 
-interface ProfileDouyin {
-  id: number
-  nickname: string
-  url: string
-}
+// interface ProfileDouyin {
+//   id: number
+//   nickname: string
+//   url: string
+// }
 
 
 export function ProfileTab() {
 
-  const [profiles, setProfiles] = useState<any[]>([
-    {
-      id: 1,
-      name: "Ben Hữu Đỗ",
-      is_authenticated: true,
-      proxy_ip: "",
-      proxy_port: "",
-    }
-  ])
+  const [profiles, setProfiles] = useState<any[]>([])
   
   const fetchProfiles = async () => {
     const result = await GetAllProfiles()
@@ -46,13 +38,7 @@ export function ProfileTab() {
     }
   }
 
-  const [profileDouyins, setProfileDouyins] = useState<any[]>([
-    {
-      id: 1,
-      nickname: "Ben Hữu Đỗ",
-      url: "https://www.douyin.com/user/123456789"
-    }
-  ])
+  const [profileDouyins, setProfileDouyins] = useState<any[]>([])
 
   const fetchProfileDouyins = async () => {
     const result = await GetAllDouyinProfiles()
@@ -84,12 +70,7 @@ export function ProfileTab() {
     proxyIp: "",
     proxyPort: "",
   })
-  const [selectedProfileDouyin, setSelectedProfileDouyin] = useState<any[]>([
-    {
-      id: 1,
-      nickname: "Ben Hữu Đỗ",
-    }
-  ])
+  const [selectedProfileDouyin, setSelectedProfileDouyin] = useState<any[]>([])
 
   const handleEdit = (profile: Profile) => {
     setCurrentProfile(profile)
@@ -113,7 +94,17 @@ export function ProfileTab() {
       })
   }
 
-  const handleLink = (profile: Profile) => {
+  const handleLink = async (profile: Profile) => {
+
+    let linkedProfiles = await GetAllDouyinProfilesFromProfile(profile.id)
+
+    if (linkedProfiles) {
+      setSelectedProfileDouyin(linkedProfiles)
+    } else {
+      setSelectedProfileDouyin([])
+    }
+
+    setCurrentProfile(profile)
     setIsLinkDialogOpen(true)
     console.log("Link profile:", profile)
   }
