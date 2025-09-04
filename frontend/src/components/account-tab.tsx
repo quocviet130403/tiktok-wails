@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Edit, Trash2, Plus } from "lucide-react"
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { GetAllProfiles, AddProfile, UpdateProfile, DeleteProfile } from "../../wailsjs/go/backend/App"
+import { Edit, Trash2, Plus, Link, Delete, DeleteIcon, Trash } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { GetAllProfiles, AddProfile, UpdateProfile, DeleteProfile, GetAllDouyinProfiles } from "../../wailsjs/go/backend/App"
 
 interface Profile {
   id: number
@@ -19,10 +19,25 @@ interface Profile {
   proxy_port: string
 }
 
+interface ProfileDouyin {
+  id: number
+  nickname: string
+  url: string
+}
+
+
 export function ProfileTab() {
 
-  const [profiles, setProfiles] = useState<any[]>([])
-
+  const [profiles, setProfiles] = useState<any[]>([
+    {
+      id: 1,
+      name: "Ben Hữu Đỗ",
+      is_authenticated: true,
+      proxy_ip: "",
+      proxy_port: "",
+    }
+  ])
+  
   const fetchProfiles = async () => {
     const result = await GetAllProfiles()
     console.log("Fetched profiles:", result)
@@ -31,12 +46,29 @@ export function ProfileTab() {
     }
   }
 
+  const [profileDouyins, setProfileDouyins] = useState<any[]>([
+    {
+      id: 1,
+      nickname: "Ben Hữu Đỗ",
+      url: "https://www.douyin.com/user/123456789"
+    }
+  ])
+
+  const fetchProfileDouyins = async () => {
+    const result = await GetAllDouyinProfiles()
+    if (result) {
+      setProfileDouyins(result)
+    }
+  }
+
   useEffect(() => {
     fetchProfiles()
+    fetchProfileDouyins()
   }, [])
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false)
   const [currentProfile, setCurrentProfile] = useState<Profile | null>(null)
   const [editPost, setEditPost] = useState({
     name: "",
@@ -52,6 +84,12 @@ export function ProfileTab() {
     proxyIp: "",
     proxyPort: "",
   })
+  const [selectedProfileDouyin, setSelectedProfileDouyin] = useState<any[]>([
+    {
+      id: 1,
+      nickname: "Ben Hữu Đỗ",
+    }
+  ])
 
   const handleEdit = (profile: Profile) => {
     setCurrentProfile(profile)
@@ -73,6 +111,11 @@ export function ProfileTab() {
       .catch((error: any) => {
         console.error("Error deleting profile:", error)
       })
+  }
+
+  const handleLink = (profile: Profile) => {
+    setIsLinkDialogOpen(true)
+    console.log("Link profile:", profile)
   }
 
   const handleSaveEdit = () => {
@@ -118,6 +161,10 @@ export function ProfileTab() {
     .catch((error: any) => {
       console.error("Error creating profile:", error)
     })
+  }
+
+  const handleLinkProfile = () => {
+    console.log("Linking selected Douyin profiles:", selectedProfileDouyin)
   }
 
   // const handleMove = (id: string, direction: "up" | "down") => {
@@ -229,6 +276,15 @@ export function ProfileTab() {
                   >
                     <Trash2 className="h-4 w-4 text-red-500" />
                     <span className="sr-only">Delete</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleLink(profile)}
+                    className="hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+                  >
+                    <Link className="h-4 w-4 text-blue-500" />
+                    <span className="sr-only">Link</span>
                   </Button>
                   {/* <div className="flex flex-col gap-0.5">
                     <Button
@@ -396,6 +452,70 @@ export function ProfileTab() {
             <Button
               type="submit"
               onClick={handleSaveCreate}
+              className="bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-200"
+            >
+              Lưu thay đổi
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isLinkDialogOpen} onOpenChange={setIsLinkDialogOpen}>
+        <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50">
+          <DialogHeader>
+            <DialogTitle className="text-gray-900 dark:text-gray-50">Liên kết profile douyin</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 items-center gap-4">
+              <Label htmlFor="name" className="text-left text-gray-700 dark:text-gray-300">
+                Profile Douyin
+              </Label>
+              <Select onValueChange={(value) => {
+                if (value == "default") return;
+                let profileDouyin = profileDouyins.find((p) => String(p.id) === value)
+                if (profileDouyin && !selectedProfileDouyin.find((p) => p.id === profileDouyin.id)) {
+                  setSelectedProfileDouyin([...selectedProfileDouyin, profileDouyin])
+                }
+              }}>
+                <SelectTrigger className="w-100 h-8 text-center bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50">
+                  <SelectValue placeholder="Select profile" />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50">
+                  <SelectItem value="default"> -- Select Profile -- </SelectItem> 
+                  {profileDouyins.map((profileDouyin) => (
+                    <SelectItem key={profileDouyin.id} value={String(profileDouyin.id)}>
+                      {profileDouyin.nickname}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-1 items-center gap-4">
+              {selectedProfileDouyin.length > 0 ? (
+                selectedProfileDouyin.map((profile) => (
+                  <div key={profile.id} className="flex items-center justify-between p-2 border rounded-md bg-gray-100 dark:bg-gray-700">
+                    <span className="text-gray-800 dark:text-gray-200">{profile.nickname}</span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setSelectedProfileDouyin(selectedProfileDouyin.filter((p) => p.id !== profile.id))
+                      }}
+                      className="hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                      <span className="sr-only">Delete</span>
+                    </Button>
+                  </div>
+                ))
+              ) : (
+                <span className="text-gray-500 dark:text-gray-400">Chưa có profile nào được liên kết</span>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="submit"
+              onClick={handleLinkProfile}
               className="bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-200"
             >
               Lưu thay đổi
