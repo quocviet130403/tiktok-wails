@@ -11,3 +11,7 @@ func NewPythonManager(db *sql.DB) *PythonManager {
 		db: db,
 	}
 }
+
+func (pm *PythonManager) TranslateVideo(id int) error {
+	return nil
+}

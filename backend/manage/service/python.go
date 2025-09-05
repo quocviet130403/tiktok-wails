@@ -1,6 +1,7 @@
 package service
 
 type PythonInterface interface {
+	TranslateVideo(id int) error
 }
 
 var (
