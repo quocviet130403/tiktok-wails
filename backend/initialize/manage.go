@@ -10,4 +10,5 @@ func InitManage(db *sql.DB) {
 	service.InitVideoManager(implement.NewVideoManager(db))
 	service.InitProfileManager(implement.NewProfileManager(db))
 	service.InitProfileDouyinManager(implement.NewProfileDouyinManager(db))
+	service.InitPythonManager(implement.NewPythonManager(db))
 }
