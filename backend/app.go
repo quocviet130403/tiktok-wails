@@ -88,6 +88,14 @@ func (a *App) DeleteDouyinProfile(id int) error {
 	return nil
 }
 
+func (a *App) ToggleHasTranslate(id int) error {
+	err := service.ProfileDouyinManager().ToggleHasTranslate(id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // Videos
 func (a *App) GetAllVideos(page int, pageSize int) ([]service.Video, error) {
 	videos, err := service.VideoManager().GetAllVideos(page, pageSize)

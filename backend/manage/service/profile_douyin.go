@@ -6,6 +6,7 @@ type ProfileDouyin struct {
 	URL           string `json:"url"`
 	LastVideoReup any    `json:"last_video_reup"`
 	RetryCount    int    `json:"retry_count"`
+	HasTranslate  bool   `json:"has_translate"`
 }
 
 type ProfileDouyinInterface interface {
@@ -17,6 +18,7 @@ type ProfileDouyinInterface interface {
 	GetVideoFromProfile(profile ProfileDouyin) error
 	UpdateLastVideoReup(id int, lastVideoReup any) error
 	GetAllProfileDouyinFromProfile(profileId int) ([]ProfileDouyin, error)
+	ToggleHasTranslate(id int) error
 }
 
 var (

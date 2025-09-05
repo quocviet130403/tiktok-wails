@@ -6,6 +6,7 @@ export namespace service {
 	    url: string;
 	    last_video_reup: any;
 	    retry_count: number;
+	    has_translate: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new ProfileDouyin(source);
@@ -18,6 +19,7 @@ export namespace service {
 	        this.url = source["url"];
 	        this.last_video_reup = source["last_video_reup"];
 	        this.retry_count = source["retry_count"];
+	        this.has_translate = source["has_translate"];
 	    }
 	}
 	export class Profiles {

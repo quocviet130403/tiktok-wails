@@ -58,6 +58,10 @@ export function SetSetting(arg1, arg2) {
   return window['go']['backend']['App']['SetSetting'](arg1, arg2);
 }
 
+export function ToggleHasTranslate(arg1) {
+  return window['go']['backend']['App']['ToggleHasTranslate'](arg1);
+}
+
 export function UpdateDouyinProfile(arg1, arg2, arg3) {
   return window['go']['backend']['App']['UpdateDouyinProfile'](arg1, arg2, arg3);
 }

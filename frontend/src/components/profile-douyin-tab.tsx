@@ -8,17 +8,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label"
 import { Edit, Trash2, Plus } from "lucide-react"
 // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { GetAllDouyinProfiles, AddDouyinProfile, UpdateDouyinProfile, DeleteDouyinProfile } from "../../wailsjs/go/backend/App"
+import { GetAllDouyinProfiles, AddDouyinProfile, UpdateDouyinProfile, DeleteDouyinProfile, ToggleHasTranslate } from "../../wailsjs/go/backend/App"
+import { Switch } from "@/components/ui/switch"
 
 interface ProfileDouyin {
   id: number
   nickname: string
   url: string
+  has_translate: boolean
 }
 
 export function ProfileDouyinTab() {
 
-  const [profiles, setProfiles] = useState<any[]>([])
+  const [profiles, setProfiles] = useState<any[]>([
+    {id: 1, nickname: "Profile 1", url: "https://www.douyin.com/user/1234567890", has_translate: true},
+  ])
 
   const fetchProfiles = async () => {
     const result = await GetAllDouyinProfiles()
@@ -209,26 +213,17 @@ export function ProfileDouyinTab() {
                     <Trash2 className="h-4 w-4 text-red-500" />
                     <span className="sr-only">Delete</span>
                   </Button>
-                  {/* <div className="flex flex-col gap-0.5">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleMove(profile.id, "up")}
-                      className="h-6 w-6 p-0 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-                    >
-                      <ChevronUp className="h-3 w-3" />
-                      <span className="sr-only">Move Up</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleMove(profile.id, "down")}
-                      className="h-6 w-6 p-0 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-                    >
-                      <ChevronDown className="h-3 w-3" />
-                      <span className="sr-only">Move Down</span>
-                    </Button>
-                  </div> */}
+                  <Switch
+                    checked={profile.has_translate}
+                    onCheckedChange={(checked) => {
+                      ToggleHasTranslate(profile.id).then(() => {
+                        fetchProfiles()
+                      }).catch((error) => {
+                        console.error("Error toggling has_translate:", error)
+                      })
+                    }}
+                    className="bg-gray-300 border-gray-300"
+                  />
                 </TableCell>
               </TableRow>
             ))}

@@ -80,7 +80,7 @@ func (pm *ProfileDouyinManager) AddProfile(nickname, url string) error {
 }
 
 func (pm *ProfileDouyinManager) GetAllProfiles() ([]service.ProfileDouyin, error) {
-	rows, err := pm.db.Query(`SELECT id, nickname, url, last_video_reup, retry_count FROM profile_douyin`)
+	rows, err := pm.db.Query(`SELECT id, nickname, url, last_video_reup, retry_count, has_translate FROM profile_douyin`)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (pm *ProfileDouyinManager) GetAllProfiles() ([]service.ProfileDouyin, error
 	var profiles []service.ProfileDouyin
 	for rows.Next() {
 		var p service.ProfileDouyin
-		if err := rows.Scan(&p.ID, &p.Nickname, &p.URL, &p.LastVideoReup, &p.RetryCount); err != nil {
+		if err := rows.Scan(&p.ID, &p.Nickname, &p.URL, &p.LastVideoReup, &p.RetryCount, &p.HasTranslate); err != nil {
 			return nil, err
 		}
 		profiles = append(profiles, p)
@@ -531,4 +531,16 @@ func (pm *ProfileDouyinManager) GetAllProfileDouyinFromProfile(profileId int) ([
 		profiles = append(profiles, profile)
 	}
 	return profiles, nil
+}
+
+func (pm *ProfileDouyinManager) ToggleHasTranslate(id int) error {
+	var currentValue bool
+	err := pm.db.QueryRow("SELECT has_translate FROM profile_douyin WHERE id = ?", id).Scan(&currentValue)
+	if err != nil {
+		return err
+	}
+
+	newValue := !currentValue
+	_, err = pm.db.Exec("UPDATE profile_douyin SET has_translate = ? WHERE id = ?", newValue, id)
+	return err
 }

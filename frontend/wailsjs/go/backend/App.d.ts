@@ -30,6 +30,8 @@ export function SeederSetting():Promise<void>;
 
 export function SetSetting(arg1:string,arg2:string):Promise<void>;
 
+export function ToggleHasTranslate(arg1:number):Promise<void>;
+
 export function UpdateDouyinProfile(arg1:number,arg2:string,arg3:string):Promise<void>;
 
 export function UpdateProfile(arg1:number,arg2:string,arg3:string,arg4:string,arg5:string,arg6:string):Promise<void>;
