@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label"
 import { Edit, Trash2, Plus, Link } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { GetAllProfiles, AddProfile, UpdateProfile, DeleteProfile, GetAllDouyinProfiles, GetAllDouyinProfilesFromProfile } from "../../wailsjs/go/backend/App"
+import { GetAllProfiles, AddProfile, UpdateProfile, DeleteProfile, GetAllDouyinProfiles, GetAllDouyinProfilesFromProfile, ConnectWithProfileDouyin } from "../../wailsjs/go/backend/App"
 
 interface Profile {
   id: number
@@ -156,6 +156,18 @@ export function ProfileTab() {
 
   const handleLinkProfile = () => {
     console.log("Linking selected Douyin profiles:", selectedProfileDouyin)
+    const listID = selectedProfileDouyin.map((p) => p.id)
+    if (currentProfile) {
+      ConnectWithProfileDouyin(currentProfile.id, listID)
+        .then(() => {
+          setIsLinkDialogOpen(false)
+          setCurrentProfile(null)
+          setSelectedProfileDouyin([])
+        })
+        .catch((error: any) => {
+          console.error("Error linking profiles:", error)
+        })
+    }
   }
 
   // const handleMove = (id: string, direction: "up" | "down") => {

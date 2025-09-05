@@ -96,13 +96,50 @@ func (am *ProfileManager) GetAllProfiles() ([]service.Profiles, error) {
 }
 
 func (am *ProfileManager) ConnectWithProfileDouyin(profileId int, listProfileDouyinId []int) error {
-	for _, profileDouyin := range listProfileDouyinId {
-		// Connect the profile with the Douyin profile
-		insertSQL := `INSERT INTO profiles_profile_douyin (profile_id, profile_douyin_id) VALUES (?, ?)`
-		_, err := am.db.Exec(insertSQL, profileId, profileDouyin)
+	existingProfiles, err := service.ProfileDouyinManager().GetAllProfileDouyinFromProfile(profileId)
+	if err != nil {
+		return err
+	}
+
+	existingMap := make(map[int]struct{}, len(existingProfiles))
+	for _, p := range existingProfiles {
+		existingMap[p.ID] = struct{}{}
+	}
+
+	newMap := make(map[int]struct{}, len(listProfileDouyinId))
+	for _, id := range listProfileDouyinId {
+		newMap[id] = struct{}{}
+	}
+
+	tx, err := am.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
 		if err != nil {
-			return err
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+
+	for id := range newMap {
+		if _, exists := existingMap[id]; !exists {
+			_, err := tx.Exec(`INSERT INTO profiles_profile_douyin (profile_id, profile_douyin_id) VALUES (?, ?)`, profileId, id)
+			if err != nil {
+				return err
+			}
 		}
 	}
+
+	for id := range existingMap {
+		if _, exists := newMap[id]; !exists {
+			_, err := tx.Exec(`DELETE FROM profiles_profile_douyin WHERE profile_id = ? AND profile_douyin_id = ?`, profileId, id)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }

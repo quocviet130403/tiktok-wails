@@ -12,7 +12,7 @@ func InitServer() error {
 	}
 
 	InitManage(dbInit)
-	// InitSchedule()
+	InitSchedule()
 
 	return nil
 }
