@@ -53,6 +53,7 @@ func InitDatabase() (*sql.DB, error) {
 		url TEXT NOT NULL UNIQUE,
 		last_video_reup TEXT DEFAULT NULL,
 		retry_count INTEGER DEFAULT 0,
+		has_translate BOOLEAN DEFAULT FALSE,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);`
 

@@ -290,6 +290,9 @@ func (vm *VideoManager) CreateConnectWithProfile(profileID int, videoID int) err
 func (vm *VideoManager) DeleteVideo(video service.Video) error {
 	deleteSQL := `UPDATE videos SET is_deleted_video = true WHERE id = ?`
 	_, err := vm.db.Exec(deleteSQL, video.ID)
+	if err != nil {
+		return err
+	}
 
 	// xóa file video
 	videoPath := fmt.Sprintf("%s/%s.mp4", global.PathVideoReup, video.Title)
@@ -299,13 +302,13 @@ func (vm *VideoManager) DeleteVideo(video service.Video) error {
 		return err
 	}
 
-	// xóa file video sub
-	videoPathSub := fmt.Sprintf("%s/%s-sub.mp4", global.PathVideoReup, video.Title)
-	err = os.Remove(videoPathSub)
-	if err != nil {
-		log.Printf("Lỗi khi xóa file video sub: %v", err)
-		return err
-	}
+	// // xóa file video sub
+	// videoPathSub := fmt.Sprintf("%s/%s-sub.mp4", global.PathVideoReup, video.Title)
+	// err = os.Remove(videoPathSub)
+	// if err != nil {
+	// 	log.Printf("Lỗi khi xóa file video sub: %v", err)
+	// 	return err
+	// }
 
 	return err
 }
