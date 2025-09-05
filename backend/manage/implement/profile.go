@@ -95,6 +95,31 @@ func (am *ProfileManager) GetAllProfiles() ([]service.Profiles, error) {
 	return profiles, nil
 }
 
+func (am *ProfileManager) GetAllProfileCheckAuthenticated() ([]service.Profiles, error) {
+	rows, err := am.db.Query("SELECT id, name, is_authenticated FROM profiles WHERE is_authenticated = true")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var profiles []service.Profiles
+
+	for rows.Next() {
+		var account service.Profiles
+		err := rows.Scan(&account.ID, &account.Name, &account.IsAuthenticated)
+		if err != nil {
+			return nil, err
+		}
+		profiles = append(profiles, account)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return profiles, nil
+}
+
 func (am *ProfileManager) ConnectWithProfileDouyin(profileId int, listProfileDouyinId []int) error {
 	existingProfiles, err := service.ProfileDouyinManager().GetAllProfileDouyinFromProfile(profileId)
 	if err != nil {
@@ -142,4 +167,10 @@ func (am *ProfileManager) ConnectWithProfileDouyin(profileId int, listProfileDou
 	}
 
 	return nil
+}
+
+func (am *ProfileManager) UpdateAuthenticatedStatus(id int, isAuthenticated bool) error {
+	updateSQL := `UPDATE profiles SET is_authenticated=? WHERE id=?`
+	_, err := am.db.Exec(updateSQL, isAuthenticated, id)
+	return err
 }

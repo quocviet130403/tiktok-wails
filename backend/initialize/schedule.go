@@ -148,4 +148,42 @@ func InitSchedule() {
 			}
 		}
 	}()
+
+	// Check Authen Profile
+	tickerCheckAuthen := time.NewTicker(1 * time.Second)
+	go func() {
+		for now := range tickerCheckAuthen.C {
+			run := false
+			switch global.ScheduleSetting.Time {
+			case "daily":
+				if now.Hour() == hour+6 {
+					run = true
+				}
+				if run {
+					go func() {
+						profiles, err := service.ProfileManager().GetAllProfileCheckAuthenticated()
+						if err != nil {
+							log.Printf("Lỗi khi lấy danh sách profile: %v", err)
+							return
+						}
+
+						for _, profile := range profiles {
+							go func(profile service.Profiles) {
+								// Logic code
+								err := service.VideoManager().LoginTiktok(profile.Name)
+								if err != nil {
+									log.Printf("Lỗi khi kiểm tra xác thực profile: %v", err)
+									err := service.ProfileManager().UpdateAuthenticatedStatus(profile.ID, false)
+									if err != nil {
+										log.Printf("Lỗi khi cập nhật trạng thái xác thực profile: %v", err)
+									}
+									return
+								}
+							}(profile)
+						}
+					}()
+				}
+			}
+		}
+	}()
 }

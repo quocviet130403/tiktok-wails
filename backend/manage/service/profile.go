@@ -15,7 +15,9 @@ type ProfileManagerInterface interface {
 	DeleteProfile(id int) error
 	AddProfile(name, hashtag, firstComment, proxy_ip, proxy_port string) error
 	GetAllProfiles() ([]Profiles, error)
+	GetAllProfileCheckAuthenticated() ([]Profiles, error)
 	ConnectWithProfileDouyin(profileId int, listProfileDouyinId []int) error
+	UpdateAuthenticatedStatus(id int, isAuthenticated bool) error
 }
 
 var (
