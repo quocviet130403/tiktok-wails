@@ -1,15 +1,15 @@
 package service
 
 type Video struct {
-	ID              int
-	Title           string
-	VideoURL        string
-	ThumbnailURL    string
-	Duration        int
-	LikeCount       int
-	ProfileDouyinID int
-	Status          string
-	IsDeleted       bool
+	ID              int    `json:"id"`
+	Title           string `json:"title"`
+	VideoURL        string `json:"video_url"`
+	ThumbnailURL    string `json:"thumbnail_url"`
+	Duration        int    `json:"duration"`
+	LikeCount       int    `json:"like_count"`
+	ProfileDouyinID int    `json:"profile_douyin_id"`
+	Status          string `json:"status"`
+	IsDeleted       bool   `json:"is_deleted"`
 }
 
 type VideoManagerInterface interface {

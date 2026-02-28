@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"tiktok-wails/backend/global"
@@ -44,11 +45,6 @@ func (pm *ProfileDouyinManager) AddProfile(nickname, url string) error {
 	}
 
 	// Defer rollback để đảm bảo rollback nếu có lỗi
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		}
-	}()
 	defer func() {
 		if err != nil {
 			tx.Rollback()
@@ -126,23 +122,7 @@ func (pm *ProfileDouyinManager) AccessProfile(profile service.ProfileDouyin) err
 	}
 	defer os.RemoveAll(tempDir)
 
-	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.ExecPath("C:/Program Files/Google/Chrome/Application/chrome.exe"),
-		chromedp.Flag("headless", true),
-		chromedp.Flag("disable-blink-features", "AutomationControlled"),
-		chromedp.Flag("disable-infobars", true),
-		chromedp.Flag("start-maximized", true),
-		chromedp.Flag("disable-dev-shm-usage", true),
-		chromedp.Flag("no-sandbox", true),
-		chromedp.Flag("disable-extensions", true),
-		chromedp.Flag("disable-gpu", true),
-		chromedp.Flag("enable-logging", true),
-		chromedp.Flag("log-level", "0"),
-		chromedp.Flag("disable-web-security", true),
-		chromedp.Flag("disable-features", "VizDisplayCompositor"),
-		chromedp.Flag("disable-ipc-flooding-protection", true),
-		chromedp.UserDataDir(tempDir),
-	)
+	opts := HeadlessChromeOpts(tempDir)
 
 	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
 	defer cancel()
@@ -240,7 +220,7 @@ func (pm *ProfileDouyinManager) AccessProfile(profile service.ProfileDouyin) err
 }
 
 func (pm *ProfileDouyinManager) UpdateLastVideoReup(id int, lastVideoReup any) error {
-	_, err := pm.db.Query("UPDATE profile_douyin SET last_video_reup = ? WHERE id = ?", lastVideoReup, id)
+	_, err := pm.db.Exec("UPDATE profile_douyin SET last_video_reup = ? WHERE id = ?", lastVideoReup, id)
 	if err != nil {
 		return fmt.Errorf("lỗi khi cập nhật last_video_reup: %w", err)
 	}
@@ -270,24 +250,7 @@ func (pm *ProfileDouyinManager) GetVideoFromProfile(profile service.ProfileDouyi
 		}
 	}()
 
-	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.ExecPath("C:/Program Files/Google/Chrome/Application/chrome.exe"),
-		chromedp.Flag("headless", true),
-		chromedp.Flag("disable-blink-features", "AutomationControlled"),
-		chromedp.Flag("disable-infobars", true),
-		chromedp.Flag("start-maximized", true),
-		chromedp.Flag("disable-dev-shm-usage", true),
-		chromedp.Flag("no-sandbox", true),
-		chromedp.Flag("disable-extensions", true),
-		chromedp.Flag("disable-gpu", true),
-		// Thêm các flag để debugging tốt hơn trong headless mode
-		chromedp.Flag("enable-logging", true),
-		chromedp.Flag("log-level", "0"),
-		chromedp.Flag("disable-web-security", true),
-		chromedp.Flag("disable-features", "VizDisplayCompositor"),
-		chromedp.Flag("disable-ipc-flooding-protection", true),
-		chromedp.UserDataDir(`C:\Users\viet1\AppData\Local\Temp\`+profile.Nickname),
-	)
+	opts := HeadlessChromeOpts(filepath.Join(os.TempDir(), profile.Nickname))
 
 	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
 	defer cancel()
@@ -413,6 +376,11 @@ func (pm *ProfileDouyinManager) GetVideoFromProfile(profile service.ProfileDouyi
 							log.Printf("Lỗi khi tạo kết nối giữa video và profile: %v", err)
 							return
 						}
+					}
+
+					if len(newVideoList) == 0 {
+						log.Println("Không có video mới để reup")
+						return
 					}
 
 					err = service.ProfileDouyinManager().UpdateLastVideoReup(profile.ID, newVideoList[0].Desc)

@@ -2,6 +2,8 @@ package initialize
 
 func InitServer() error {
 
+	InitLogger()
+
 	dbInit, err := InitDatabase()
 	if err != nil {
 		panic("Error initializing database: " + err.Error())

@@ -3,11 +3,10 @@ package implement
 import (
 	"context"
 	"database/sql"
-	"encoding/base64"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"tiktok-wails/backend/global"
 	"tiktok-wails/backend/manage/service"
 	"time"
@@ -24,18 +23,7 @@ func NewVideoManager(db *sql.DB) *VideoManager {
 }
 
 func (vm *VideoManager) LoginTiktok(temdir string) error {
-	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.ExecPath(global.PathAppChrome),                         // chỉnh lại nếu cần
-		chromedp.Flag("headless", false),                                // hiển thị trình duyệt
-		chromedp.Flag("disable-blink-features", "AutomationControlled"), // ẩn thuộc tính "navigator.webdriver"
-		chromedp.Flag("disable-infobars", true),                         // tắt thanh thông tin "Chrome is being controlled by..."
-		chromedp.Flag("start-maximized", true),                          // mở trình duyệt với kích thước tối đa
-		chromedp.Flag("disable-dev-shm-usage", true),                    // tránh crash trong môi trường ít tài nguyên
-		chromedp.Flag("no-sandbox", true),                               // tránh sandbox errors (nên cân nhắc với bảo mật)
-		chromedp.Flag("disable-extensions", true),                       // tắt extension mặc định
-		chromedp.Flag("disable-gpu", true),                              // tắt GPU (tùy máy)
-		chromedp.UserDataDir(global.PathTempProfile+temdir),             // Thư mục tạm để lưu dữ liệu người dùng
-	)
+	opts := DefaultChromeOpts(global.PathTempProfile+temdir, false)
 
 	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
 	defer cancel()
@@ -61,20 +49,7 @@ func (vm *VideoManager) LoginTiktok(temdir string) error {
 }
 
 func (vm *VideoManager) UploadVideo(profile, video, title string) error {
-	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.ExecPath(global.PathAppChrome),                         // chỉnh lại nếu cần
-		chromedp.Flag("headless", false),                                // hiển thị trình duyệt
-		chromedp.Flag("disable-blink-features", "AutomationControlled"), // ẩn thuộc tính "navigator.webdriver"
-		chromedp.Flag("disable-infobars", true),                         // tắt thanh thông tin "Chrome is being controlled by..."
-		chromedp.Flag("start-maximized", true),                          // mở trình duyệt với kích thước tối đa
-		chromedp.Flag("disable-dev-shm-usage", true),                    // tránh crash trong môi trường ít tài nguyên
-		chromedp.Flag("no-sandbox", true),                               // tránh sandbox errors (nên cân nhắc với bảo mật)
-		chromedp.Flag("disable-extensions", true),                       // tắt extension mặc định
-		chromedp.Flag("disable-gpu", true),                              // tắt GPU (tùy máy)
-		chromedp.Flag("lang", "vi-VN"),                                  // đặt ngôn ngữ tiếng Việt
-		chromedp.Flag("accept-language", "vi-VN,vi;q=0.9,en;q=0.8"),     // thứ tự ưu tiên ngôn ngữ
-		chromedp.UserDataDir(global.PathTempProfile+profile),
-	)
+	opts := VisibleChromeOpts(global.PathTempProfile + profile)
 
 	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
 	defer cancel()
@@ -96,30 +71,18 @@ func (vm *VideoManager) UploadVideo(profile, video, title string) error {
 		// 	return nil
 		// }),
 		chromedp.ActionFunc(func(ctx context.Context) error {
-			// Đọc file thành base64
-			fileData, err := ioutil.ReadFile(`videos/` + video) // Đường dẫn đến file video
+			// Sử dụng SetUploadFiles thay vì base64 để tránh tốn RAM
+			videoPath, err := filepath.Abs(filepath.Join("videos", video))
 			if err != nil {
-				return err
+				return fmt.Errorf("lỗi khi lấy đường dẫn video: %w", err)
 			}
 
-			base64Data := base64.StdEncoding.EncodeToString(fileData)
+			// Kiểm tra file tồn tại
+			if _, err := os.Stat(videoPath); os.IsNotExist(err) {
+				return fmt.Errorf("file video không tồn tại: %s", videoPath)
+			}
 
-			// Inject file data thông qua CDP
-			js := fmt.Sprintf(`
-				(function() {
-					const input = document.querySelector('input[type="file"]');
-					if (input) {
-						const blob = new Blob([Uint8Array.from(atob('%s'), c => c.charCodeAt(0))], {type: 'video/mp4'});
-						const file = new File([blob], 'video.mp4', {type: 'video/mp4'});
-						const dt = new DataTransfer();
-						dt.items.add(file);
-						input.files = dt.files;
-						input.dispatchEvent(new Event('change', {bubbles: true}));
-					}
-				})();
-			`, base64Data)
-
-			return chromedp.Evaluate(js, nil).Do(ctx)
+			return chromedp.SetUploadFiles(`input[type="file"]`, []string{videoPath}, chromedp.ByQuery).Do(ctx)
 		}),
 
 		// chromedp.ActionFunc(func(ctx context.Context) error {
@@ -172,7 +135,7 @@ func (vm *VideoManager) UploadVideo(profile, video, title string) error {
 	)
 
 	if err != nil {
-		log.Fatalf("Lỗi khi điều hướng đến trang chính: %v", err)
+		log.Printf("Lỗi khi upload video: %v", err)
 		return err
 	}
 
@@ -181,6 +144,23 @@ func (vm *VideoManager) UploadVideo(profile, video, title string) error {
 }
 
 func (vm *VideoManager) AddVideo(title, videoURL, thumbnailURL string, duration int, likeCount int, profileDouyinID int) (service.Video, error) {
+	// Kiểm tra video đã tồn tại chưa (tránh duplicate)
+	var existingID int
+	err := vm.db.QueryRow(`SELECT id FROM videos WHERE video_url = ?`, videoURL).Scan(&existingID)
+	if err == nil {
+		// Video đã tồn tại, trả về video hiện có
+		log.Printf("Video đã tồn tại với ID: %d, bỏ qua", existingID)
+		return service.Video{
+			ID:              existingID,
+			Title:           title,
+			VideoURL:        videoURL,
+			ThumbnailURL:    thumbnailURL,
+			Duration:        duration,
+			LikeCount:       likeCount,
+			ProfileDouyinID: profileDouyinID,
+		}, nil
+	}
+
 	insertSQL := `INSERT INTO videos (title, video_url, thumbnail_url, duration, like_count, profile_douyin_id) VALUES (?, ?, ?, ?, ?, ?)`
 	result, err := vm.db.Exec(insertSQL, title, videoURL, thumbnailURL, duration, likeCount, profileDouyinID)
 	if err != nil {
@@ -247,16 +227,21 @@ func (vm *VideoManager) GetAllVideosNP() ([]service.Video, error) {
 }
 
 func (vm *VideoManager) GetVideoReup(profile_id int) ([]service.Video, error) {
-	allVideos, err := global.DB.Query(`
-		SELECT v.* FROM video AS v
-		WHERE v.profile_douyin_id IN (
-			SELECT pd.id FROM profile_douyin AS pd
-			LEFT JOIN profile AS p ON pd.profile_id = p.id
-			WHERE p.id = ?
-			AND v.status = 'done'
+	allVideos, err := vm.db.Query(`
+		SELECT v.id, v.title, v.video_url, v.thumbnail_url, v.duration, v.like_count, v.profile_douyin_id, v.status
+		FROM videos AS v
+		WHERE v.status = 'pending'
+		AND v.is_deleted_video = false
+		AND v.profile_douyin_id IN (
+			SELECT ppd.profile_douyin_id FROM profiles_profile_douyin AS ppd
+			WHERE ppd.profile_id = ?
+		)
+		AND v.id NOT IN (
+			SELECT vp.video_id FROM videos_profiles AS vp
+			WHERE vp.profile_id = ? AND vp.status = 'done'
 		)
 		LIMIT 10
-	`, profile_id)
+	`, profile_id, profile_id)
 	if err != nil {
 		return nil, err
 	}

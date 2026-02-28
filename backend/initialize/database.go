@@ -152,5 +152,21 @@ func InitDatabase() (*sql.DB, error) {
 		return nil, err
 	}
 
+	// Thêm indexes cho các foreign key để tăng performance query
+	indexes := []string{
+		`CREATE INDEX IF NOT EXISTS idx_ppd_profile_id ON profiles_profile_douyin(profile_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_ppd_douyin_id ON profiles_profile_douyin(profile_douyin_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_videos_douyin_id ON videos(profile_douyin_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_videos_status ON videos(status)`,
+		`CREATE INDEX IF NOT EXISTS idx_videos_url ON videos(video_url)`,
+		`CREATE INDEX IF NOT EXISTS idx_vp_video_id ON videos_profiles(video_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_vp_profile_id ON videos_profiles(profile_id)`,
+	}
+	for _, idx := range indexes {
+		if _, err = db.Exec(idx); err != nil {
+			return nil, err
+		}
+	}
+
 	return db, nil
 }

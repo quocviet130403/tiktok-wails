@@ -40,11 +40,6 @@ func (am *ProfileManager) AddProfile(name, hashtag, firstComment, proxy_ip, prox
 			tx.Rollback()
 		}
 	}()
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		}
-	}()
 	isAuthenticated := false
 	// Thử đăng nhập TikTok
 	err = service.VideoManager().LoginTiktok(name)

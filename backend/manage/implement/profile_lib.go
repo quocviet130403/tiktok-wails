@@ -57,6 +57,7 @@ func NewPuzzleCaptchaSolver(gapImagePath, bgImagePath, outputImagePath string) *
 }
 
 // RemoveWhitespace crops an image to the area containing non-whitespace pixels.
+// Uses threshold + findContours for performance instead of per-pixel iteration.
 func (s *PuzzleCaptchaSolver) RemoveWhitespace(imagePath string) (gocv.Mat, error) {
 	img := gocv.IMRead(imagePath, gocv.IMReadColor)
 	if img.Empty() {
@@ -64,39 +65,29 @@ func (s *PuzzleCaptchaSolver) RemoveWhitespace(imagePath string) (gocv.Mat, erro
 	}
 	defer img.Close()
 
-	rows := img.Rows()
-	cols := img.Cols()
+	// Convert to grayscale and apply inverse binary threshold
+	gray := gocv.NewMat()
+	defer gray.Close()
+	gocv.CvtColor(img, &gray, gocv.ColorBGRToGray)
 
-	minX, minY := rows, cols
-	maxX, maxY := 0, 0
+	binary := gocv.NewMat()
+	defer binary.Close()
+	gocv.Threshold(gray, &binary, 250, 255, gocv.ThresholdBinaryInv)
 
-	// Iterate through pixels to find the bounding box of non-whitespace
-	// In GoCV, you access pixel data directly if performance is critical,
-	// but for simplicity, we'll iterate with GetVecb, which can be slower.
-	// For production, consider direct pointer access.
-	for x := 0; x < rows; x++ {
-		for y := 0; y < cols; y++ {
-			pixel := img.GetVecbAt(x, y) // Returns a []byte for the pixel (BGR)
-			// Check if pixel is not "pure" white (e.g., all channels 255)
-			// Or if there's significant variation, indicating non-whitespace
-			// This check is a simplification; a more robust check might involve
-			// checking for a minimum difference between channels or absolute values.
-			if pixel[0] < 250 || pixel[1] < 250 || pixel[2] < 250 { // If any channel is not almost white
-				minX = min(x, minX)
-				minY = min(y, minY)
-				maxX = max(x, maxX)
-				maxY = max(y, maxY)
-			}
-		}
-	}
+	// Find bounding rect of all non-white pixels
+	contours := gocv.FindContours(binary, gocv.RetrievalExternal, gocv.ChainApproxSimple)
+	defer contours.Close()
 
-	// If no non-whitespace pixels found, return empty Mat or an error
-	if minX > maxX || minY > maxY {
+	if contours.Size() == 0 {
 		return gocv.Mat{}, fmt.Errorf("no non-whitespace pixels found in image: %s", imagePath)
 	}
 
-	// Define the rectangle for cropping
-	rect := image.Rect(minY, minX, maxY, maxX) // gocv.Mat takes rect as (col1, row1, col2, row2)
+	// Merge all contour bounding rects into one
+	rect := gocv.BoundingRect(contours.At(0))
+	for i := 1; i < contours.Size(); i++ {
+		r := gocv.BoundingRect(contours.At(i))
+		rect = rect.Union(r)
+	}
 
 	// Crop the image
 	croppedImg := img.Region(rect)
@@ -193,21 +184,6 @@ func (s *PuzzleCaptchaSolver) Discern() (int, error) {
 	}
 
 	return slidePosition, nil
-}
-
-// Helper functions for min/max
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }
 
 func DownloadImage(url, filePath string) error {

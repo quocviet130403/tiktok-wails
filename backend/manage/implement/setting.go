@@ -40,6 +40,6 @@ func (sm *SettingManager) GetSetting(key string) (string, error) {
 }
 
 func (sm *SettingManager) SetSetting(key, value string) error {
-	_, err := sm.db.Exec("INSERT INTO settings (key, value) VALUES (?, ?) ON DUPLICATE KEY UPDATE value = ?", key, value, value)
+	_, err := sm.db.Exec("INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = ?", key, value, value)
 	return err
 }
