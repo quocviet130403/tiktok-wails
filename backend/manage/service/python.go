@@ -10,7 +10,7 @@ var (
 
 func PythonManager() PythonInterface {
 	if localPython == nil {
-		panic("PythonManager is not initialized")
+		return nil
 	}
 	return localPython
 }

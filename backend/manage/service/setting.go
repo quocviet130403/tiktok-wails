@@ -1,5 +1,7 @@
 package service
 
+import "log"
+
 type SettingInterface interface {
 	GetAllSettings() (map[string]string, error)
 	GetSetting(key string) (string, error)
@@ -12,7 +14,8 @@ var (
 
 func SettingManager() SettingInterface {
 	if localSetting == nil {
-		panic("SettingManager is not initialized")
+		log.Println("[Service] SettingManager chưa khởi tạo")
+		return nil
 	}
 	return localSetting
 }

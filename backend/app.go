@@ -2,12 +2,14 @@ package backend
 
 import (
 	"context"
+	"fmt"
 	"tiktok-wails/backend/manage/service"
 )
 
 // App struct
 type App struct {
-	ctx context.Context
+	ctx   context.Context
+	ready bool
 }
 
 // NewApp creates a new App application struct
@@ -15,15 +17,20 @@ func NewApp() *App {
 	return &App{}
 }
 
+var errNotReady = fmt.Errorf("server đang khởi tạo, vui lòng chờ...")
+
 // Startup is called when the app starts. The context is saved
 // so we can call the runtime methods
-
 func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
+	a.ready = true // InitServer() đã chạy xong trong main()
 }
 
 // Profiles
 func (a *App) GetAllProfiles() []service.Profiles {
+	if !a.ready {
+		return nil
+	}
 	profiles, err := service.ProfileManager().GetAllProfiles()
 	if err != nil {
 		return nil
@@ -32,133 +39,117 @@ func (a *App) GetAllProfiles() []service.Profiles {
 }
 
 func (a *App) AddProfile(name, hashtag, firstComment string, proxyIP string, proxyPort string) error {
-	err := service.ProfileManager().AddProfile(name, hashtag, firstComment, proxyIP, proxyPort)
-	if err != nil {
-		return err
+	if !a.ready {
+		return errNotReady
 	}
-	return nil
+	return service.ProfileManager().AddProfile(name, hashtag, firstComment, proxyIP, proxyPort)
 }
 
 func (a *App) UpdateProfile(id int, name, hashtag, firstComment string, proxyIP string, proxyPort string) error {
-	err := service.ProfileManager().UpdateProfile(id, name, hashtag, firstComment, proxyIP, proxyPort)
-	if err != nil {
-		return err
+	if !a.ready {
+		return errNotReady
 	}
-	return nil
+	return service.ProfileManager().UpdateProfile(id, name, hashtag, firstComment, proxyIP, proxyPort)
 }
 
 func (a *App) DeleteProfile(id int) error {
-	err := service.ProfileManager().DeleteProfile(id)
-	if err != nil {
-		return err
+	if !a.ready {
+		return errNotReady
 	}
-	return nil
+	return service.ProfileManager().DeleteProfile(id)
 }
 
 // Profile Douyin
 func (a *App) GetAllDouyinProfiles() ([]service.ProfileDouyin, error) {
-	profiles, err := service.ProfileDouyinManager().GetAllProfiles()
-	if err != nil {
-		return nil, err
+	if !a.ready {
+		return nil, errNotReady
 	}
-	return profiles, nil
+	return service.ProfileDouyinManager().GetAllProfiles()
 }
 
 func (a *App) AddDouyinProfile(nickname, url string) error {
-	err := service.ProfileDouyinManager().AddProfile(nickname, url)
-	if err != nil {
-		return err
+	if !a.ready {
+		return errNotReady
 	}
-	return nil
+	return service.ProfileDouyinManager().AddProfile(nickname, url)
 }
 
 func (a *App) UpdateDouyinProfile(id int, nickname, url string) error {
-	err := service.ProfileDouyinManager().UpdateProfile(id, nickname, url)
-	if err != nil {
-		return err
+	if !a.ready {
+		return errNotReady
 	}
-	return nil
+	return service.ProfileDouyinManager().UpdateProfile(id, nickname, url)
 }
 
 func (a *App) DeleteDouyinProfile(id int) error {
-	err := service.ProfileDouyinManager().DeleteProfile(id)
-	if err != nil {
-		return err
+	if !a.ready {
+		return errNotReady
 	}
-	return nil
+	return service.ProfileDouyinManager().DeleteProfile(id)
 }
 
 func (a *App) ToggleHasTranslate(id int) error {
-	err := service.ProfileDouyinManager().ToggleHasTranslate(id)
-	if err != nil {
-		return err
+	if !a.ready {
+		return errNotReady
 	}
-	return nil
+	return service.ProfileDouyinManager().ToggleHasTranslate(id)
 }
 
 // Videos
 func (a *App) GetAllVideos(page int, pageSize int) ([]service.Video, error) {
-	videos, err := service.VideoManager().GetAllVideos(page, pageSize)
-	if err != nil {
-		return nil, err
+	if !a.ready {
+		return nil, errNotReady
 	}
-	return videos, nil
+	return service.VideoManager().GetAllVideos(page, pageSize)
 }
 
 func (a *App) AddVideo(title string, videoURL string, thumbnailURL string, duration int, likeCount int, profileDouyinID int) (service.Video, error) {
-	result, err := service.VideoManager().AddVideo(title, videoURL, thumbnailURL, duration, likeCount, profileDouyinID)
-	if err != nil {
-		return service.Video{}, err
+	if !a.ready {
+		return service.Video{}, errNotReady
 	}
-	return result, nil
+	return service.VideoManager().AddVideo(title, videoURL, thumbnailURL, duration, likeCount, profileDouyinID)
 }
 
 // Settings
 func (a *App) GetAllSettings() (map[string]string, error) {
-	settings, err := service.SettingManager().GetAllSettings()
-	if err != nil {
-		return nil, err
+	if !a.ready {
+		return nil, errNotReady
 	}
-	return settings, nil
+	return service.SettingManager().GetAllSettings()
 }
 
 func (a *App) GetSetting(key string) (string, error) {
-	value, err := service.SettingManager().GetSetting(key)
-	if err != nil {
-		return "", err
+	if !a.ready {
+		return "", errNotReady
 	}
-	return value, nil
+	return service.SettingManager().GetSetting(key)
 }
 
 func (a *App) SetSetting(key, value string) error {
-	err := service.SettingManager().SetSetting(key, value)
-	if err != nil {
-		return err
+	if !a.ready {
+		return errNotReady
 	}
-	return nil
+	return service.SettingManager().SetSetting(key, value)
 }
 
 func (a *App) SeederSetting() error {
-	err := service.SettingManager().SetSetting("path_chrome", "C:/Program Files/Google/Chrome/Application/chrome.exe")
-	if err != nil {
-		return err
+	if !a.ready {
+		return errNotReady
 	}
-	return nil
+	return service.SettingManager().SetSetting("path_chrome", "C:/Program Files/Google/Chrome/Application/chrome.exe")
 }
 
 // Connect profile with douyin profiles
 func (a *App) ConnectWithProfileDouyin(profileId int, listProfileDouyinId []int) error {
-	err := service.ProfileManager().ConnectWithProfileDouyin(profileId, listProfileDouyinId)
-	if err != nil {
-		return err
+	if !a.ready {
+		return errNotReady
 	}
-	return nil
+	return service.ProfileManager().ConnectWithProfileDouyin(profileId, listProfileDouyinId)
 }
 
 func (a *App) GetAllDouyinProfilesFromProfile(profileId int) ([]service.ProfileDouyin, error) {
-	profiles, err := service.ProfileDouyinManager().GetAllProfileDouyinFromProfile(profileId)
-	if err != nil {
-		return nil, err
+	if !a.ready {
+		return nil, errNotReady
 	}
-	return profiles, nil
+	return service.ProfileDouyinManager().GetAllProfileDouyinFromProfile(profileId)
 }

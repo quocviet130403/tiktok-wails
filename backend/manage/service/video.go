@@ -31,7 +31,7 @@ var (
 
 func VideoManager() VideoManagerInterface {
 	if localVideoManager == nil {
-		panic("VideoManager is not initialized")
+		return nil
 	}
 	return localVideoManager
 }

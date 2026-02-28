@@ -14,10 +14,8 @@ import (
 var assets embed.FS
 
 func main() {
-	// Create an instance of the app structure
-
-	err := initialize.InitServer()
-	if err != nil {
+	// Khởi tạo server TRƯỚC wails.Run để tất cả managers sẵn sàng
+	if err := initialize.InitServer(); err != nil {
 		println("Error initializing server:", err.Error())
 		return
 	}
@@ -25,7 +23,7 @@ func main() {
 	app := backend.NewApp()
 
 	// Create application with options
-	err = wails.Run(&options.App{
+	err := wails.Run(&options.App{
 		Title:  "tiktok-wails",
 		Width:  1024,
 		Height: 768,

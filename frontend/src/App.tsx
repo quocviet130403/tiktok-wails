@@ -1,105 +1,112 @@
 "use client"
 
 import { useState } from "react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ThemeProvider } from "@/components/theme-provider"
-import { MainHeader } from "@/components/main-header"
+import { ModeToggle } from "@/components/ui/mode-toggle"
+import { Toaster } from "@/components/ui/sonner"
 import { VideoTab } from "@/components/video-tab"
 import { SettingsTab } from "@/components/settings-tab"
 import { ProfileTab } from "@/components/account-tab"
-import { ProfileDouyinTab } from "./components/profile-douyin-tab"
+import { ProfileDouyinTab } from "@/components/profile-douyin-tab"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Badge } from "@/components/ui/badge"
+import { Chrome, Video, Settings, CircleDot } from "lucide-react"
+
+type TabKey = "profiles" | "douyin" | "videos" | "settings"
+
+const navItems: { key: TabKey; icon: React.ElementType; label: string; color: string }[] = [
+  { key: "profiles", icon: Chrome, label: "Chrome Profiles", color: "text-blue-500" },
+  { key: "douyin", icon: CircleDot, label: "Douyin Profiles", color: "text-pink-500" },
+  { key: "videos", icon: Video, label: "Videos", color: "text-violet-500" },
+  { key: "settings", icon: Settings, label: "Cài đặt", color: "text-gray-400" },
+]
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState("account")
-  const [isDarkMode, setIsDarkMode] = useState(false)
-  const toggleTheme = () => setIsDarkMode((prev) => !prev)
+  const [activeTab, setActiveTab] = useState<TabKey>("profiles")
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "profiles": return <ProfileTab />
+      case "douyin": return <ProfileDouyinTab />
+      case "videos": return <VideoTab />
+      case "settings": return <SettingsTab />
+    }
+  }
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-50">
-        <MainHeader toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
-        <div className="flex-1 p-4 overflow-auto">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-4 bg-gray-200 dark:bg-gray-800 rounded-lg p-1 mb-4">
-              <TabsTrigger
-                value="account"
-                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-gray-50 transition-colors duration-200"
-              >
-                Quản lý Profile chrome
-              </TabsTrigger>
-              <TabsTrigger
-                value="douyin"
-                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-gray-50 transition-colors duration-200"
-              >
-                Quản lý Profile Douyin
-              </TabsTrigger>
-              <TabsTrigger
-                value="video"
-                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-gray-50 transition-colors duration-200"
-              >
-                Quản lý Video
-              </TabsTrigger>
-              <TabsTrigger
-                value="settings"
-                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-gray-50 transition-colors duration-200"
-              >
-                Cài đặt
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent
-              value="account"
-              className="flex-1 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-auto"
-            >
-              <ProfileTab />
-            </TabsContent>
-            <TabsContent
-              value="douyin"
-              className="flex-1 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-auto"
-            >
-              <ProfileDouyinTab />
-            </TabsContent>
-            <TabsContent
-              value="video"
-              className="flex-1 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-auto"
-            >
-              <VideoTab />
-            </TabsContent>
-            <TabsContent
-              value="settings"
-              className="flex-1 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-auto"
-            >
-              <SettingsTab />
-            </TabsContent>
-          </Tabs>
-        </div>
-        <div className="flex items-center justify-between p-2 bg-gray-200 dark:bg-gray-800 border-t border-gray-300 dark:border-gray-700 text-sm">
-          {/* <div className="flex items-center gap-2">
-            <span className="font-medium">Đỗ Hữu Ben (Vĩnh viễn)</span>
-          </div> */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1">
-              <input
-                type="checkbox"
-                id="auto-delete"
-                className="form-checkbox h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
-              />
-              <label htmlFor="auto-delete" className="text-gray-700 dark:text-gray-300">
-                Auto Delete
-              </label>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <TooltipProvider delayDuration={100}>
+        <div className="flex h-screen bg-background text-foreground">
+
+          {/* Sidebar */}
+          <aside className="w-[60px] flex flex-col items-center border-r border-border bg-card py-4 gap-1">
+            {/* Logo */}
+            <div className="mb-4 w-9 h-9 rounded-lg bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center">
+              <span className="text-white font-bold text-sm">TR</span>
             </div>
-            <div className="flex items-center gap-1">
-              <input
-                type="checkbox"
-                id="auto-shutdown"
-                className="form-checkbox h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
-              />
-              <label htmlFor="auto-shutdown" className="text-gray-700 dark:text-gray-300">
-                Auto Shutdown
-              </label>
+
+            {/* Nav Items */}
+            <nav className="flex flex-col gap-1 flex-1">
+              {navItems.map((item) => {
+                const isActive = activeTab === item.key
+                const Icon = item.icon
+                return (
+                  <Tooltip key={item.key}>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => setActiveTab(item.key)}
+                        className={`
+                          w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200
+                          ${isActive
+                            ? "bg-primary/10 shadow-sm"
+                            : "hover:bg-accent"
+                          }
+                        `}
+                      >
+                        <Icon className={`h-5 w-5 ${isActive ? item.color : "text-muted-foreground"}`} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" sideOffset={8}>
+                      {item.label}
+                    </TooltipContent>
+                  </Tooltip>
+                )
+              })}
+            </nav>
+
+            {/* Bottom: Theme Toggle */}
+            <div className="mt-auto">
+              <ModeToggle />
             </div>
+          </aside>
+
+          {/* Main Area */}
+          <div className="flex-1 flex flex-col min-w-0">
+
+            {/* Top Bar */}
+            <header className="h-12 border-b border-border bg-card/50 backdrop-blur-sm flex items-center justify-between px-4 shrink-0">
+              <div className="flex items-center gap-3">
+                <h1 className="text-sm font-semibold tracking-tight">
+                  {navItems.find(n => n.key === activeTab)?.label}
+                </h1>
+              </div>
+              <div className="flex items-center gap-3">
+                <Badge variant="secondary" className="text-xs gap-1.5 font-normal">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Pipeline Idle
+                </Badge>
+              </div>
+            </header>
+
+            {/* Content */}
+            <main className="flex-1 overflow-auto p-4">
+              {renderContent()}
+            </main>
+
           </div>
         </div>
-      </div>
+        <Toaster />
+      </TooltipProvider>
     </ThemeProvider>
   )
 }

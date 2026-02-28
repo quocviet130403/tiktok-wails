@@ -27,7 +27,7 @@ var (
 
 func ProfileDouyinManager() ProfileDouyinInterface {
 	if localProfileDouyinManager == nil {
-		panic("ProfileDouyinManager is not initialized")
+		return nil
 	}
 	return localProfileDouyinManager
 }

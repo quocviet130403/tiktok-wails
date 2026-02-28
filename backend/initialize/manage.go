@@ -7,6 +7,7 @@ import (
 )
 
 func InitManage(db *sql.DB) {
+	service.InitSettingManager(implement.NewSettingManager(db))
 	service.InitVideoManager(implement.NewVideoManager(db))
 	service.InitProfileManager(implement.NewProfileManager(db))
 	service.InitProfileDouyinManager(implement.NewProfileDouyinManager(db))

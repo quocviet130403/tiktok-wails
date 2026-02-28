@@ -26,7 +26,7 @@ var (
 
 func ProfileManager() ProfileManagerInterface {
 	if localProfileManager == nil {
-		panic("ProfileManager is not initialized")
+		return nil
 	}
 	return localProfileManager
 }

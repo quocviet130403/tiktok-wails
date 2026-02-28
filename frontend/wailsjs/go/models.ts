@@ -47,15 +47,15 @@ export namespace service {
 	    }
 	}
 	export class Video {
-	    ID: number;
-	    Title: string;
-	    VideoURL: string;
-	    ThumbnailURL: string;
-	    Duration: number;
-	    LikeCount: number;
-	    ProfileDouyinID: number;
-	    Status: string;
-	    IsDeleted: boolean;
+	    id: number;
+	    title: string;
+	    video_url: string;
+	    thumbnail_url: string;
+	    duration: number;
+	    like_count: number;
+	    profile_douyin_id: number;
+	    status: string;
+	    is_deleted: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Video(source);
@@ -63,15 +63,15 @@ export namespace service {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.ID = source["ID"];
-	        this.Title = source["Title"];
-	        this.VideoURL = source["VideoURL"];
-	        this.ThumbnailURL = source["ThumbnailURL"];
-	        this.Duration = source["Duration"];
-	        this.LikeCount = source["LikeCount"];
-	        this.ProfileDouyinID = source["ProfileDouyinID"];
-	        this.Status = source["Status"];
-	        this.IsDeleted = source["IsDeleted"];
+	        this.id = source["id"];
+	        this.title = source["title"];
+	        this.video_url = source["video_url"];
+	        this.thumbnail_url = source["thumbnail_url"];
+	        this.duration = source["duration"];
+	        this.like_count = source["like_count"];
+	        this.profile_douyin_id = source["profile_douyin_id"];
+	        this.status = source["status"];
+	        this.is_deleted = source["is_deleted"];
 	    }
 	}
 

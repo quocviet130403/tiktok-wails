@@ -6,45 +6,44 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Edit, Trash2, Plus, Link } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { GetAllProfiles, AddProfile, UpdateProfile, DeleteProfile, GetAllDouyinProfiles, GetAllDouyinProfilesFromProfile, ConnectWithProfileDouyin } from "../../wailsjs/go/backend/App"
+import { Edit, Trash2, Plus, Link, Search, ShieldCheck, ShieldX } from "lucide-react"
+import {
+  GetAllProfiles,
+  AddProfile,
+  UpdateProfile,
+  DeleteProfile,
+  GetAllDouyinProfiles,
+  GetAllDouyinProfilesFromProfile,
+  ConnectWithProfileDouyin,
+} from "../../wailsjs/go/backend/App"
 
 interface Profile {
   id: number
   name: string
   hashtag: string
   first_comment: string
+  is_authenticated: boolean
   proxy_ip: string
   proxy_port: string
 }
 
-// interface ProfileDouyin {
-//   id: number
-//   nickname: string
-//   url: string
-// }
-
-
 export function ProfileTab() {
+  const [profiles, setProfiles] = useState<Profile[]>([])
+  const [searchQuery, setSearchQuery] = useState("")
+  const [profileDouyins, setProfileDouyins] = useState<any[]>([])
 
-  const [profiles, setProfiles] = useState<any[]>([])
-  
   const fetchProfiles = async () => {
     const result = await GetAllProfiles()
-    console.log("Fetched profiles:", result)
-    if (result) {
-      setProfiles(result)
-    }
+    if (result) setProfiles(result)
   }
-
-  const [profileDouyins, setProfileDouyins] = useState<any[]>([])
 
   const fetchProfileDouyins = async () => {
     const result = await GetAllDouyinProfiles()
-    if (result) {
-      setProfileDouyins(result)
-    }
+    if (result) setProfileDouyins(result)
   }
 
   useEffect(() => {
@@ -56,21 +55,13 @@ export function ProfileTab() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false)
   const [currentProfile, setCurrentProfile] = useState<Profile | null>(null)
-  const [editPost, setEditPost] = useState({
-    name: "",
-    hashtag: "",
-    firstComment: "",
-    proxyIp: "",
-    proxyPort: "",
-  })
-  const [createPost, setCreatePost] = useState({
-    name: "",
-    hashtag: "",
-    firstComment: "",
-    proxyIp: "",
-    proxyPort: "",
-  })
+  const [editPost, setEditPost] = useState({ name: "", hashtag: "", firstComment: "", proxyIp: "", proxyPort: "" })
+  const [createPost, setCreatePost] = useState({ name: "", hashtag: "", firstComment: "", proxyIp: "", proxyPort: "" })
   const [selectedProfileDouyin, setSelectedProfileDouyin] = useState<any[]>([])
+
+  const filteredProfiles = profiles.filter((p) =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   const handleEdit = (profile: Profile) => {
     setCurrentProfile(profile)
@@ -85,444 +76,245 @@ export function ProfileTab() {
   }
 
   const handleDelete = (id: number) => {
-    DeleteProfile(id)
-      .then(() => {
-        fetchProfiles()
-      })
-      .catch((error: any) => {
-        console.error("Error deleting profile:", error)
-      })
+    DeleteProfile(id).then(() => fetchProfiles()).catch(console.error)
   }
 
   const handleLink = async (profile: Profile) => {
-
-    let linkedProfiles = await GetAllDouyinProfilesFromProfile(profile.id)
-
-    if (linkedProfiles) {
-      setSelectedProfileDouyin(linkedProfiles)
-    } else {
-      setSelectedProfileDouyin([])
-    }
-
+    const linked = await GetAllDouyinProfilesFromProfile(profile.id)
+    setSelectedProfileDouyin(linked || [])
     setCurrentProfile(profile)
     setIsLinkDialogOpen(true)
-    console.log("Link profile:", profile)
   }
 
   const handleSaveEdit = () => {
-    if (currentProfile) {
-
-      UpdateProfile(currentProfile.id, editPost.name, editPost.hashtag, editPost.firstComment, editPost.proxyIp, editPost.proxyPort)
-        .then(() => {
-          fetchProfiles()
-          setIsEditDialogOpen(false)
-          setCurrentProfile(null)
-          setEditPost({
-            name: "",
-            hashtag: "",
-            firstComment: "",
-            proxyIp: "",
-            proxyPort: "",
-          })
-        })
-        .catch((error: any) => {
-          console.error("Error updating profile:", error)
-        })
-    }
+    if (!currentProfile) return
+    UpdateProfile(currentProfile.id, editPost.name, editPost.hashtag, editPost.firstComment, editPost.proxyIp, editPost.proxyPort)
+      .then(() => { fetchProfiles(); setIsEditDialogOpen(false) })
+      .catch(console.error)
   }
 
   const handleSaveCreate = () => {
-    console.log("Creating new profile with data:", createPost)
-
     AddProfile(createPost.name, createPost.hashtag, createPost.firstComment, createPost.proxyIp, createPost.proxyPort)
-    .then(() => {
-      console.log("Profile created successfully")
-      fetchProfiles()
-      
-      setCreatePost({
-        name: "",
-        hashtag: "",
-        firstComment: "",
-        proxyIp: "",
-        proxyPort: "",
+      .then(() => {
+        fetchProfiles()
+        setCreatePost({ name: "", hashtag: "", firstComment: "", proxyIp: "", proxyPort: "" })
+        setIsCreateDialogOpen(false)
       })
-      
-      setIsCreateDialogOpen(false)
-    })
-    .catch((error: any) => {
-      console.error("Error creating profile:", error)
-    })
+      .catch(console.error)
   }
 
   const handleLinkProfile = () => {
-    console.log("Linking selected Douyin profiles:", selectedProfileDouyin)
-    const listID = selectedProfileDouyin.map((p) => p.id)
-    if (currentProfile) {
-      ConnectWithProfileDouyin(currentProfile.id, listID)
-        .then(() => {
-          setIsLinkDialogOpen(false)
-          setCurrentProfile(null)
-          setSelectedProfileDouyin([])
-        })
-        .catch((error: any) => {
-          console.error("Error linking profiles:", error)
-        })
-    }
+    if (!currentProfile) return
+    ConnectWithProfileDouyin(currentProfile.id, selectedProfileDouyin.map((p) => p.id))
+      .then(() => { setIsLinkDialogOpen(false); setSelectedProfileDouyin([]) })
+      .catch(console.error)
   }
 
-  // const handleMove = (id: string, direction: "up" | "down") => {
-  //   const index = profiles.findIndex((acc) => acc.id === id)
-  //   if (index === -1) return
-
-  //   const newProfiles = [...profiles]
-  //   if (direction === "up" && index > 0) {
-  //     ;[newProfiles[index - 1], newProfiles[index]] = [newProfiles[index], newProfiles[index - 1]]
-  //   } else if (direction === "down" && index < newProfiles.length - 1) {
-  //     ;[newProfiles[index + 1], newProfiles[index]] = [newProfiles[index], newProfiles[index + 1]]
-  //   }
-  //   setProfiles(newProfiles)
-  // }
-
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center gap-2 mb-4 p-2 border rounded-md bg-gray-50 dark:bg-gray-700">
-        {/* <Select defaultValue="Ben Hữu Đỗ (dohuubenbmt@...)">
-          <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50">
-            <SelectValue placeholder="Select an profile" />
-          </SelectTrigger>
-          <SelectContent className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50">
-            <SelectItem value="Ben Hữu Đỗ (dohuubenbmt@...)">Ben Hữu Đỗ (dohuubenbmt@...)</SelectItem>
-            <SelectItem value="Profile 2">Profile 2</SelectItem>
-          </SelectContent>
-        </Select> */}
-        {/* <Button
-          variant="ghost"
-          size="icon"
-          className="hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-        >
-          <X className="h-4 w-4 text-red-500" />
-          <span className="sr-only">Delete Selected</span>
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-        >
-          <Check className="h-4 w-4 text-green-500" />
-          <span className="sr-only">Confirm</span>
-        </Button> */}
-        {/* <div className="flex items-center gap-1 ml-auto">
-          <input
-            type="checkbox"
-            id="page-checkbox"
-            className="form-checkbox h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
+    <div className="flex flex-col h-full gap-4">
+      {/* Toolbar */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Tìm profile..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 h-9"
           />
-          <label htmlFor="page-checkbox" className="text-gray-700 dark:text-gray-300 text-sm">
-            Page
-          </label>
         </div>
-        <div className="flex items-center gap-1">
-          <input
-            type="checkbox"
-            id="group-checkbox"
-            className="form-checkbox h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
-          />
-          <label htmlFor="group-checkbox" className="text-gray-700 dark:text-gray-300 text-sm">
-            Group
-          </label>
-        </div> */}
-        <Button
-          variant="ghost"
-          className="flex items-center gap-1 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-          onClick={() => setIsCreateDialogOpen(true)}
-        >
-          <Plus className="h-4 w-4" /> Add
+        <Button onClick={() => setIsCreateDialogOpen(true)} size="sm" className="gap-1.5">
+          <Plus className="h-4 w-4" /> Thêm Profile
         </Button>
       </div>
 
-      <div className="border rounded-md overflow-auto flex-1 bg-white dark:bg-gray-800">
-        <Table className="w-full">
-          <TableHeader className="bg-gray-100 dark:bg-gray-700 sticky top-0">
-            <TableRow className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
-              <TableHead className="w-[100px] text-gray-700 dark:text-gray-300">ID</TableHead>
-              <TableHead className="text-gray-700 dark:text-gray-300">Tên</TableHead>
-              <TableHead className="text-gray-700 dark:text-gray-300">Xác thực</TableHead>
-              <TableHead className="text-gray-700 dark:text-gray-300">Proxy</TableHead>
-              <TableHead className="w-[80px] text-center text-gray-700 dark:text-gray-300">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {profiles.map((profile) => (
-              <TableRow
-                key={profile.id}
-                className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
-              >
-                <TableCell className="font-medium text-gray-800 dark:text-gray-200">{profile.id}</TableCell>
-                <TableCell className="text-gray-800 dark:text-gray-200">{profile.name}</TableCell>
-                <TableCell className="text-gray-800 dark:text-gray-200">{profile.is_authenticated ? "Đã xác thực" : "Chưa xác thực"}</TableCell>
-                <TableCell className="text-gray-800 dark:text-gray-200">{profile.proxy_ip ? profile.proxy_ip+":"+profile.proxy_port : "Không có"}</TableCell>
-                <TableCell className="text-center flex items-center justify-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEdit(profile)}
-                    className="hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-                  >
-                    <Edit className="h-4 w-4 text-blue-500" />
-                    <span className="sr-only">Edit</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(profile.id)}
-                    className="hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                    <span className="sr-only">Delete</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleLink(profile)}
-                    className="hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-                  >
-                    <Link className="h-4 w-4 text-blue-500" />
-                    <span className="sr-only">Link</span>
-                  </Button>
-                  {/* <div className="flex flex-col gap-0.5">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleMove(profile.id, "up")}
-                      className="h-6 w-6 p-0 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-                    >
-                      <ChevronUp className="h-3 w-3" />
-                      <span className="sr-only">Move Up</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleMove(profile.id, "down")}
-                      className="h-6 w-6 p-0 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-                    >
-                      <ChevronDown className="h-3 w-3" />
-                      <span className="sr-only">Move Down</span>
-                    </Button>
-                  </div> */}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      {/* Table */}
+      <Card className="flex-1 overflow-hidden">
+        <CardContent className="p-0 h-full">
+          <div className="overflow-auto h-full">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="w-[60px]">ID</TableHead>
+                  <TableHead>Tên</TableHead>
+                  <TableHead className="w-[120px]">Xác thực</TableHead>
+                  <TableHead className="w-[160px]">Proxy</TableHead>
+                  <TableHead className="w-[120px] text-center">Thao tác</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredProfiles.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                      Không có profile nào
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredProfiles.map((profile) => (
+                    <TableRow key={profile.id} className="group">
+                      <TableCell className="font-mono text-xs text-muted-foreground">{profile.id}</TableCell>
+                      <TableCell className="font-medium">{profile.name}</TableCell>
+                      <TableCell>
+                        {profile.is_authenticated ? (
+                          <Badge variant="secondary" className="gap-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-0">
+                            <ShieldCheck className="h-3 w-3" /> Đã xác thực
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="gap-1 bg-red-500/10 text-red-600 dark:text-red-400 border-0">
+                            <ShieldX className="h-3 w-3" /> Chưa
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {profile.proxy_ip ? `${profile.proxy_ip}:${profile.proxy_port}` : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center justify-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleEdit(profile)}>
+                                <Edit className="h-3.5 w-3.5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Chỉnh sửa</TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleLink(profile)}>
+                                <Link className="h-3.5 w-3.5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Liên kết Douyin</TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(profile.id)}>
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Xóa</TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
+      {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-gray-900 dark:text-gray-50">Chỉnh sửa Profile</DialogTitle>
+            <DialogTitle>Chỉnh sửa Profile</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right text-gray-700 dark:text-gray-300">
-                Tên
-              </Label>
-              <Input
-                id="name"
-                value={editPost?.name}
-                onChange={(e) => setEditPost({ ...editPost, name: e.target.value })}
-                className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="hashtag" className="text-right text-gray-700 dark:text-gray-300">
-                Hashtag
-              </Label>
-              <Input
-                id="hashtag"
-                value={editPost?.hashtag}
-                onChange={(e) => setEditPost({ ...editPost, hashtag: e.target.value })}
-                className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="first_comment" className="text-right text-gray-700 dark:text-gray-300">
-                First Comment
-              </Label>
-              <Input
-                id="first_comment"
-                value={editPost?.firstComment}
-                onChange={(e) => setEditPost({ ...editPost, firstComment: e.target.value })}
-                className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="proxy_ip" className="text-right text-gray-700 dark:text-gray-300">
-                Proxy IP
-              </Label>
-              <Input
-                id="proxy_ip"
-                value={editPost?.proxyIp}
-                onChange={(e) => setEditPost({ ...editPost, proxyIp: e.target.value })}
-                className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="proxy_port" className="text-right text-gray-700 dark:text-gray-300">
-                Proxy Port
-              </Label>
-              <Input
-                id="proxy_port"
-                value={editPost?.proxyPort}
-                onChange={(e) => setEditPost({ ...editPost, proxyPort: e.target.value })}
-                className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
-              />
-            </div>
+          <div className="grid gap-3 py-2">
+            {[
+              { id: "name", label: "Tên", value: editPost.name, key: "name" as const },
+              { id: "hashtag", label: "Hashtag", value: editPost.hashtag, key: "hashtag" as const },
+              { id: "first_comment", label: "Comment đầu", value: editPost.firstComment, key: "firstComment" as const },
+              { id: "proxy_ip", label: "Proxy IP", value: editPost.proxyIp, key: "proxyIp" as const },
+              { id: "proxy_port", label: "Proxy Port", value: editPost.proxyPort, key: "proxyPort" as const },
+            ].map((field) => (
+              <div key={field.id} className="grid grid-cols-4 items-center gap-3">
+                <Label htmlFor={field.id} className="text-right text-sm">{field.label}</Label>
+                <Input
+                  id={field.id}
+                  value={field.value}
+                  onChange={(e) => setEditPost({ ...editPost, [field.key]: e.target.value })}
+                  className="col-span-3 h-9"
+                />
+              </div>
+            ))}
           </div>
           <DialogFooter>
-            <Button
-              type="submit"
-              onClick={handleSaveEdit}
-              className="bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-200"
-            >
-              Lưu thay đổi
-            </Button>
+            <Button onClick={handleSaveEdit} size="sm">Lưu thay đổi</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Create Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-gray-900 dark:text-gray-50">Tạo mới Profile</DialogTitle>
+            <DialogTitle>Tạo mới Profile</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right text-gray-700 dark:text-gray-300">
-                Tên
-              </Label>
-              <Input
-                id="name"
-                value={createPost.name}
-                onChange={(e) => setCreatePost({ ...createPost, name: e.target.value })}
-                className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="hashtag" className="text-right text-gray-700 dark:text-gray-300">
-                Hashtag
-              </Label>
-              <Input
-                id="hashtag"
-                value={createPost.hashtag}
-                onChange={(e) => setCreatePost({ ...createPost, hashtag: e.target.value })}
-                className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="first_comment" className="text-right text-gray-700 dark:text-gray-300">
-                First Comment
-              </Label>
-              <Input
-                id="first_comment"
-                value={createPost.firstComment}
-                onChange={(e) => setCreatePost({ ...createPost, firstComment: e.target.value })}
-                className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="proxy_ip" className="text-right text-gray-700 dark:text-gray-300">
-                Proxy IP
-              </Label>
-              <Input
-                id="proxy_ip"
-                value={createPost.proxyIp}
-                onChange={(e) => setCreatePost({ ...createPost, proxyIp: e.target.value })}
-                className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="proxy_port" className="text-right text-gray-700 dark:text-gray-300">
-                Proxy Port
-              </Label>
-              <Input
-                id="proxy_port"
-                value={createPost.proxyPort}
-                onChange={(e) => setCreatePost({ ...createPost, proxyPort: e.target.value })}
-                className="col-span-3 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50"
-              />
-            </div>
+          <div className="grid gap-3 py-2">
+            {[
+              { id: "c-name", label: "Tên", value: createPost.name, key: "name" as const },
+              { id: "c-hashtag", label: "Hashtag", value: createPost.hashtag, key: "hashtag" as const },
+              { id: "c-fc", label: "Comment đầu", value: createPost.firstComment, key: "firstComment" as const },
+              { id: "c-pip", label: "Proxy IP", value: createPost.proxyIp, key: "proxyIp" as const },
+              { id: "c-pport", label: "Proxy Port", value: createPost.proxyPort, key: "proxyPort" as const },
+            ].map((field) => (
+              <div key={field.id} className="grid grid-cols-4 items-center gap-3">
+                <Label htmlFor={field.id} className="text-right text-sm">{field.label}</Label>
+                <Input
+                  id={field.id}
+                  value={field.value}
+                  onChange={(e) => setCreatePost({ ...createPost, [field.key]: e.target.value })}
+                  className="col-span-3 h-9"
+                />
+              </div>
+            ))}
           </div>
           <DialogFooter>
-            <Button
-              type="submit"
-              onClick={handleSaveCreate}
-              className="bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-200"
-            >
-              Lưu thay đổi
-            </Button>
+            <Button onClick={handleSaveCreate} size="sm">Tạo Profile</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Link Dialog */}
       <Dialog open={isLinkDialogOpen} onOpenChange={setIsLinkDialogOpen}>
-        <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-gray-900 dark:text-gray-50">Liên kết profile douyin</DialogTitle>
+            <DialogTitle>Liên kết Douyin Profile</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 items-center gap-4">
-              <Label htmlFor="name" className="text-left text-gray-700 dark:text-gray-300">
-                Profile Douyin
-              </Label>
+          <div className="grid gap-3 py-2">
+            <div className="grid grid-cols-4 items-center gap-3">
+              <Label className="text-right text-sm">Douyin</Label>
               <Select onValueChange={(value) => {
-                if (value == "default") return;
-                let profileDouyin = profileDouyins.find((p) => String(p.id) === value)
-                if (profileDouyin && !selectedProfileDouyin.find((p) => p.id === profileDouyin.id)) {
-                  setSelectedProfileDouyin([...selectedProfileDouyin, profileDouyin])
+                if (value === "default") return
+                const p = profileDouyins.find((pd) => String(pd.id) === value)
+                if (p && !selectedProfileDouyin.find((s) => s.id === p.id)) {
+                  setSelectedProfileDouyin([...selectedProfileDouyin, p])
                 }
               }}>
-                <SelectTrigger className="w-100 h-8 text-center bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-50">
-                  <SelectValue placeholder="Select profile" />
+                <SelectTrigger className="col-span-3 h-9">
+                  <SelectValue placeholder="Chọn profile..." />
                 </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50">
-                  <SelectItem value="default"> -- Select Profile -- </SelectItem> 
-                  {profileDouyins.map((profileDouyin) => (
-                    <SelectItem key={profileDouyin.id} value={String(profileDouyin.id)}>
-                      {profileDouyin.nickname}
-                    </SelectItem>
+                <SelectContent>
+                  <SelectItem value="default">-- Chọn Profile --</SelectItem>
+                  {profileDouyins.map((p) => (
+                    <SelectItem key={p.id} value={String(p.id)}>{p.nickname}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-1 items-center gap-4">
+            <div className="space-y-2 max-h-40 overflow-auto">
               {selectedProfileDouyin.length > 0 ? (
-                selectedProfileDouyin.map((profile) => (
-                  <div key={profile.id} className="flex items-center justify-between p-2 border rounded-md bg-gray-100 dark:bg-gray-700">
-                    <span className="text-gray-800 dark:text-gray-200">{profile.nickname}</span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setSelectedProfileDouyin(selectedProfileDouyin.filter((p) => p.id !== profile.id))
-                      }}
-                      className="hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+                selectedProfileDouyin.map((p) => (
+                  <div key={p.id} className="flex items-center justify-between px-3 py-2 rounded-md bg-muted">
+                    <span className="text-sm">{p.nickname}</span>
+                    <Button variant="ghost" size="icon" className="h-6 w-6"
+                      onClick={() => setSelectedProfileDouyin(selectedProfileDouyin.filter((s) => s.id !== p.id))}
                     >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                      <span className="sr-only">Delete</span>
+                      <Trash2 className="h-3 w-3 text-destructive" />
                     </Button>
                   </div>
                 ))
               ) : (
-                <span className="text-gray-500 dark:text-gray-400">Chưa có profile nào được liên kết</span>
+                <p className="text-sm text-muted-foreground text-center py-4">Chưa có liên kết nào</p>
               )}
             </div>
           </div>
           <DialogFooter>
-            <Button
-              type="submit"
-              onClick={handleLinkProfile}
-              className="bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-200"
-            >
-              Lưu thay đổi
-            </Button>
+            <Button onClick={handleLinkProfile} size="sm">Lưu liên kết</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
