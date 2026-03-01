@@ -5,6 +5,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle as AlertDialogTitleComp,
+} from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -40,6 +50,8 @@ export function ProfileDouyinTab() {
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [deleteProfileId, setDeleteProfileId] = useState<number | null>(null)
   const [currentProfile, setCurrentProfile] = useState<ProfileDouyin | null>(null)
   const [editPost, setEditPost] = useState({ nickname: "", url: "" })
   const [createPost, setCreatePost] = useState({ nickname: "", url: "" })
@@ -55,7 +67,19 @@ export function ProfileDouyinTab() {
   }
 
   const handleDelete = (id: number) => {
-    DeleteDouyinProfile(id).then(() => fetchProfiles()).catch(console.error)
+    setDeleteProfileId(id)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const handleConfirmDelete = () => {
+    if (deleteProfileId === null) return
+    DeleteDouyinProfile(deleteProfileId)
+      .then(() => fetchProfiles())
+      .catch(console.error)
+      .finally(() => {
+        setIsDeleteDialogOpen(false)
+        setDeleteProfileId(null)
+      })
   }
 
   const handleSaveEdit = () => {
@@ -215,6 +239,24 @@ export function ProfileDouyinTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitleComp>Xác nhận xóa Douyin Profile</AlertDialogTitleComp>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn xóa Douyin profile này không? Hành động này không thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteProfileId(null)}>Hủy</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Xóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

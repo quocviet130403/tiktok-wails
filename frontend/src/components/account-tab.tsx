@@ -5,6 +5,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -54,6 +64,8 @@ export function ProfileTab() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [deleteProfileId, setDeleteProfileId] = useState<number | null>(null)
   const [currentProfile, setCurrentProfile] = useState<Profile | null>(null)
   const [editPost, setEditPost] = useState({ name: "", hashtag: "", firstComment: "", proxyIp: "", proxyPort: "" })
   const [createPost, setCreatePost] = useState({ name: "", hashtag: "", firstComment: "", proxyIp: "", proxyPort: "" })
@@ -76,7 +88,19 @@ export function ProfileTab() {
   }
 
   const handleDelete = (id: number) => {
-    DeleteProfile(id).then(() => fetchProfiles()).catch(console.error)
+    setDeleteProfileId(id)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const handleConfirmDelete = () => {
+    if (deleteProfileId === null) return
+    DeleteProfile(deleteProfileId)
+      .then(() => fetchProfiles())
+      .catch(console.error)
+      .finally(() => {
+        setIsDeleteDialogOpen(false)
+        setDeleteProfileId(null)
+      })
   }
 
   const handleLink = async (profile: Profile) => {
@@ -318,6 +342,24 @@ export function ProfileTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa Profile</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn xóa profile này không? Hành động này không thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteProfileId(null)}>Hủy</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Xóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
