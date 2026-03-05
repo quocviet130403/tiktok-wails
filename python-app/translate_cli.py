@@ -94,6 +94,8 @@ def run_pipeline(
 
     # ========== Step 5: Render ASS ==========
     logger.info("📝 Step 5/5: Generating ASS subtitle...")
+    # Optimize timing to reduce flicker between adjacent segments
+    asr_data.optimize_timing()
     from core.asr_data import SubtitleLayoutEnum
     asr_data.to_ass(save_path=ass_path, layout=SubtitleLayoutEnum.ONLY_TRANSLATE)
     logger.info(f"   → Saved {ass_path}")

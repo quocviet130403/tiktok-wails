@@ -1,11 +1,20 @@
-"""Subtitle translator - LLM-based translation with agent loop.
+"""Subtitle translator - LLM-based translation with multi-threading and cache.
 
-Ported from VideoCaptioner's translate module.
-Supports standard and reflect (3-stage) translation modes.
+Ported from VideoCaptioner's translate module with full feature parity:
+- Multi-threaded batch translation (ThreadPoolExecutor)
+- Translation cache (disk-based, 7 day expiry)
+- Standard and reflect (3-stage) translation modes
+- Single-line fallback on batch failure
 """
 
+import hashlib
 import json
 import logging
+import os
+import pickle
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import json_repair
@@ -19,16 +28,55 @@ logger = logging.getLogger("subtitle_translator")
 
 MAX_STEPS = 3
 DEFAULT_BATCH_SIZE = 10
+DEFAULT_THREAD_NUM = 4
+CACHE_EXPIRY_SECONDS = 7 * 24 * 3600  # 7 days
+
+
+class TranslationCache:
+    """Simple disk-based translation cache."""
+
+    def __init__(self, cache_dir: Optional[str] = None):
+        if cache_dir is None:
+            cache_dir = os.path.join(os.path.dirname(__file__), "..", ".cache", "translate")
+        self.cache_dir = Path(cache_dir)
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+
+    def _key_to_path(self, key: str) -> Path:
+        hashed = hashlib.md5(key.encode()).hexdigest()
+        return self.cache_dir / f"{hashed}.pkl"
+
+    def get(self, key: str) -> Optional[Any]:
+        path = self._key_to_path(key)
+        if not path.exists():
+            return None
+        try:
+            with open(path, "rb") as f:
+                data = pickle.load(f)
+            if time.time() - data.get("timestamp", 0) > CACHE_EXPIRY_SECONDS:
+                path.unlink(missing_ok=True)
+                return None
+            return data.get("value")
+        except Exception:
+            return None
+
+    def set(self, key: str, value: Any) -> None:
+        path = self._key_to_path(key)
+        try:
+            with open(path, "wb") as f:
+                pickle.dump({"value": value, "timestamp": time.time()}, f)
+        except Exception:
+            pass
 
 
 class LLMTranslator:
-    """LLM-based subtitle translator with agent loop validation."""
+    """LLM-based subtitle translator with multi-threading, cache, and agent loop."""
 
     def __init__(
         self,
         model: str,
         target_language: str = "越南语",
         batch_num: int = DEFAULT_BATCH_SIZE,
+        thread_num: int = DEFAULT_THREAD_NUM,
         custom_prompt: str = "",
         is_reflect: bool = False,
         update_callback: Optional[Callable] = None,
@@ -36,45 +84,52 @@ class LLMTranslator:
         self.model = model
         self.target_language = target_language
         self.batch_num = batch_num
+        self.thread_num = thread_num
         self.custom_prompt = custom_prompt
         self.is_reflect = is_reflect
         self.update_callback = update_callback
+        self._cache = TranslationCache()
 
     def translate_subtitle(self, subtitle_data: Union[str, ASRData]) -> ASRData:
-        """Translate all subtitles (main entry)."""
+        """Translate all subtitles with multi-threading (main entry)."""
         try:
             if isinstance(subtitle_data, str):
                 asr_data = ASRData.from_subtitle_file(subtitle_data)
             else:
                 asr_data = subtitle_data
 
-            # Build translation data
+            # Build chunks
             translate_items = [
                 {"index": i, "text": seg.text}
                 for i, seg in enumerate(asr_data.segments, 1)
             ]
 
-            # Split into chunks
             chunks = [
                 translate_items[i:i + self.batch_num]
                 for i in range(0, len(translate_items), self.batch_num)
             ]
 
-            # Translate all chunks
+            logger.info(f"Translating {len(translate_items)} segments in {len(chunks)} batches "
+                        f"with {self.thread_num} threads")
+
+            # Multi-threaded translation
             translation_map: Dict[int, str] = {}
-            for chunk in chunks:
-                try:
-                    result = self._translate_chunk(chunk)
-                    translation_map.update(result)
-                except Exception as e:
-                    logger.error(f"Chunk translation failed: {e}")
-                    # Try single-line fallback
-                    for item in chunk:
-                        try:
-                            text = self._translate_single(item["text"])
-                            translation_map[item["index"]] = text
-                        except Exception as e2:
-                            logger.error(f"Single translation failed for {item['index']}: {e2}")
+
+            with ThreadPoolExecutor(max_workers=self.thread_num) as executor:
+                futures = {
+                    executor.submit(self._safe_translate_chunk, chunk): chunk
+                    for chunk in chunks
+                }
+
+                for future in as_completed(futures):
+                    chunk = futures[future]
+                    try:
+                        result = future.result()
+                        translation_map.update(result)
+                    except Exception as e:
+                        logger.error(f"Chunk translation failed: {e}")
+                        # Fallback: add original text
+                        for item in chunk:
                             translation_map[item["index"]] = item["text"]
 
             # Apply translations
@@ -90,6 +145,25 @@ class LLMTranslator:
             logger.error(f"Translation failed: {e}")
             raise RuntimeError(f"Translation failed: {e}")
 
+    def _get_cache_key(self, chunk: List[dict]) -> str:
+        """Generate cache key for a chunk."""
+        text = "|".join(f"{item['index']}:{item['text']}" for item in chunk)
+        return f"LLMTranslator:{self.model}:{self.target_language}:{hashlib.md5(text.encode()).hexdigest()}"
+
+    def _safe_translate_chunk(self, chunk: List[dict]) -> Dict[int, str]:
+        """Translate with cache check."""
+        cache_key = self._get_cache_key(chunk)
+        cached = self._cache.get(cache_key)
+        if cached is not None:
+            logger.info(f"Cache hit for segments {chunk[0]['index']}-{chunk[-1]['index']}")
+            return cached
+
+        result = self._translate_chunk(chunk)
+
+        # Cache result
+        self._cache.set(cache_key, result)
+        return result
+
     def _translate_chunk(self, chunk: List[dict]) -> Dict[int, str]:
         """Translate a batch of subtitles using agent loop."""
         subtitle_dict = {str(item["index"]): item["text"] for item in chunk}
@@ -97,34 +171,38 @@ class LLMTranslator:
         logger.info(f"Translating subtitles: {chunk[0]['index']} - {chunk[-1]['index']}")
 
         # Get prompt
-        if self.is_reflect:
-            prompt = get_prompt(
-                "translate/reflect",
-                target_language=self.target_language,
-                custom_prompt=self.custom_prompt,
-            )
-        else:
-            prompt = get_prompt(
-                "translate/standard",
-                target_language=self.target_language,
-                custom_prompt=self.custom_prompt,
-            )
+        prompt_name = "translate/reflect" if self.is_reflect else "translate/standard"
+        prompt = get_prompt(
+            prompt_name,
+            target_language=self.target_language,
+            custom_prompt=self.custom_prompt,
+        )
 
-        # Agent loop
-        result_dict = self._agent_loop(prompt, subtitle_dict)
+        try:
+            result_dict = self._agent_loop(prompt, subtitle_dict)
 
-        # Process reflect mode results
-        if self.is_reflect and isinstance(result_dict, dict):
-            processed = {}
-            for k, v in result_dict.items():
-                if isinstance(v, dict):
-                    processed[int(k)] = str(v.get("native_translation", v))
-                else:
-                    processed[int(k)] = str(v)
-        else:
-            processed = {int(k): str(v) for k, v in result_dict.items()}
+            # Process reflect mode results
+            if self.is_reflect and isinstance(result_dict, dict):
+                processed = {}
+                for k, v in result_dict.items():
+                    if isinstance(v, dict):
+                        processed[int(k)] = str(v.get("native_translation", v))
+                    else:
+                        processed[int(k)] = str(v)
+            else:
+                processed = {int(k): str(v) for k, v in result_dict.items()}
 
-        return processed
+            return processed
+
+        except openai.RateLimitError as e:
+            logger.error(f"Rate limit: {e}")
+            raise
+        except openai.AuthenticationError as e:
+            logger.error(f"Auth error: {e}")
+            raise
+        except Exception as e:
+            logger.warning(f"Batch translate failed, trying single mode: {e}")
+            return self._translate_chunk_single(chunk)
 
     def _agent_loop(self, system_prompt: str, subtitle_dict: Dict[str, str]) -> Dict[str, str]:
         """LLM → Validate → Feedback → Retry."""
@@ -165,12 +243,12 @@ class LLMTranslator:
             extra = actual - expected
             parts = []
             if missing:
-                parts.append(f"Missing keys: {sorted(missing, key=lambda x: int(x) if x.isdigit() else x)}")
+                sort_key = lambda x: int(x) if x.isdigit() else x
+                parts.append(f"Missing keys {sorted(missing, key=sort_key)} - you must translate these items")
             if extra:
-                parts.append(f"Extra keys: {sorted(extra, key=lambda x: int(x) if x.isdigit() else x)}")
+                parts.append(f"Extra keys {sorted(extra, key=sort_key)} - remove them")
             return False, "; ".join(parts)
 
-        # Validate reflect mode structure
         if self.is_reflect:
             for key, value in response_dict.items():
                 if not isinstance(value, dict):
@@ -180,15 +258,24 @@ class LLMTranslator:
 
         return True, ""
 
-    def _translate_single(self, text: str) -> str:
-        """Fallback: translate a single line."""
+    def _translate_chunk_single(self, chunk: List[dict]) -> Dict[int, str]:
+        """Fallback: translate one line at a time."""
         single_prompt = get_prompt("translate/single", target_language=self.target_language)
-        response = call_llm(
-            messages=[
-                {"role": "system", "content": single_prompt},
-                {"role": "user", "content": text},
-            ],
-            model=self.model,
-            temperature=0.7,
-        )
-        return response.choices[0].message.content.strip()
+        result = {}
+
+        for item in chunk:
+            try:
+                response = call_llm(
+                    messages=[
+                        {"role": "system", "content": single_prompt},
+                        {"role": "user", "content": item["text"]},
+                    ],
+                    model=self.model,
+                    temperature=0.7,
+                )
+                result[item["index"]] = response.choices[0].message.content.strip()
+            except Exception as e:
+                logger.error(f"Single translate failed for {item['index']}: {e}")
+                result[item["index"]] = item["text"]
+
+        return result

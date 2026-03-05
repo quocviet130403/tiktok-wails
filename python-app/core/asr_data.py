@@ -109,6 +109,27 @@ class ASRData:
     def has_data(self) -> bool:
         return len(self.segments) > 0
 
+    def optimize_timing(self, threshold_ms: int = 1000) -> "ASRData":
+        """Optimize subtitle display timing by adjusting adjacent segment boundaries.
+
+        If gap between adjacent segments is below threshold, adjust the boundary
+        to 3/4 point between them (reduces flicker).
+        """
+        if self.is_word_timestamp() or not self.segments:
+            return self
+
+        for i in range(len(self.segments) - 1):
+            current_seg = self.segments[i]
+            next_seg = self.segments[i + 1]
+            time_gap = next_seg.start_time - current_seg.end_time
+
+            if time_gap < threshold_ms:
+                mid_time = (current_seg.end_time + next_seg.start_time) // 2 + time_gap // 4
+                current_seg.end_time = mid_time
+                next_seg.start_time = mid_time
+
+        return self
+
     def _is_word_level_segment(self, segment: ASRDataSeg) -> bool:
         """Check if a single segment is word-level."""
         text = segment.text.strip()
