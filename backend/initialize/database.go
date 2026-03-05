@@ -14,6 +14,14 @@ const (
 	KEY_RUN_AT_TIME     = "run_at_time"
 	VALUE_RUN_AT_TIME   = "24"
 	MAX_VIDEO_REUP      = 10
+
+	// LLM Settings
+	KEY_LLM_BASE_URL   = "llm_base_url"
+	VALUE_LLM_BASE_URL = "https://api.deepseek.com/v1"
+	KEY_LLM_API_KEY    = "llm_api_key"
+	VALUE_LLM_API_KEY  = "sk-f6e9fbcd490845cb863e7bd660677c86"
+	KEY_LLM_MODEL      = "llm_model"
+	VALUE_LLM_MODEL    = "deepseek-chat"
 )
 
 func InitDatabase() (*sql.DB, error) {
@@ -135,6 +143,20 @@ func InitDatabase() (*sql.DB, error) {
 	}
 
 	_, err = db.Exec("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", KEY_RUN_AT_TIME, VALUE_RUN_AT_TIME)
+	if err != nil {
+		return nil, err
+	}
+
+	// LLM settings for subtitle pipeline
+	_, err = db.Exec("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", KEY_LLM_BASE_URL, VALUE_LLM_BASE_URL)
+	if err != nil {
+		return nil, err
+	}
+	_, err = db.Exec("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", KEY_LLM_API_KEY, VALUE_LLM_API_KEY)
+	if err != nil {
+		return nil, err
+	}
+	_, err = db.Exec("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", KEY_LLM_MODEL, VALUE_LLM_MODEL)
 	if err != nil {
 		return nil, err
 	}
